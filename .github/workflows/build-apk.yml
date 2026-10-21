@@ -26,35 +26,25 @@ jobs:
         with:
           gradle-version: '8.9'
 
-      - name: Extract The Pianist
+      - name: Reassemble and extract The Pianist
         run: |
-          ZIP=$(find . -maxdepth 1 -type f \
-            -name 'ThePianistAndroid-GitHubBuild-*.zip' \
-            | sort -V | tail -n 1)
-
-          echo "Using ZIP: $ZIP"
-
-          if [ -z "$ZIP" ]; then
-            echo "The Pianist source ZIP not found"
-            exit 1
-          fi
-
-          rm -rf build-project
           mkdir -p build-project
-          unzip -q "$ZIP" -d build-project
 
-          echo "Extracted successfully"
+          cat ThePianist-v0.3.7.part01 \
+              ThePianist-v0.3.7.part02 > game-source.zip
 
-      - name: Build APK
+          echo "9295b90f53819460f647039f66f16c544d3bfb1f094c6d3540154dd68f0fd0a6  game-source.zip" | sha256sum -c -
+
+          unzip -q game-source.zip -d build-project
+
+      - name: Build Android APK
         run: |
           PROJECT=$(find build-project -type f \
             \( -name 'settings.gradle' -o -name 'settings.gradle.kts' \) \
             -printf '%h\n' | head -n 1)
 
-          echo "Project found at: $PROJECT"
-
           if [ -z "$PROJECT" ]; then
-            echo "Android Gradle project not found"
+            echo "Android project not found!"
             exit 1
           fi
 
@@ -68,20 +58,15 @@ jobs:
           APK=$(find build-project -type f \
             -name 'app-debug.apk' | head -n 1)
 
-          echo "APK found at: $APK"
-
           if [ -z "$APK" ]; then
-            echo "APK not found"
+            echo "APK not found!"
             exit 1
           fi
 
-          cp "$APK" apk-output/ThePianist-v0.1.0-debug.apk
-
-          ls -lh apk-output/
+          cp "$APK" apk-output/ThePianist-v0.3.7.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: ThePianist-v0.1.0-APK
-          path: apk-output/ThePianist-v0.1.0-debug.apk
-          if-no-files-found: error
+          name: ThePianist-v0.3.7-APK
+          path: apk-output/ThePianist-v0.3.7.apk
