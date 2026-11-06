@@ -154,15 +154,20 @@ function interact(){
 // Do not paint a second swinging door OVER their already-painted leaves.
 // The balcony slider is a separate, physical opening with no duplicated base leaf.
 function drawBalconyDoor(){
-  const img=files[spriteFile.balconyThreshold];
-  if(img.complete&&img.naturalWidth)ctx.drawImage(img,574,171,89,68);
-  const dx=balconyOpening*64;
-  ctx.save();ctx.globalAlpha=.93;
-  ctx.fillStyle='#546b70';ctx.fillRect(587+dx,179,57,43);
-  ctx.fillStyle='rgba(95,135,143,.57)';ctx.fillRect(592+dx,183,47,35);
-  ctx.strokeStyle='#c8c1ad';ctx.lineWidth=4;ctx.strokeRect(587+dx,178,57,45);
-  ctx.fillStyle='#d5ceb5';ctx.fillRect(594+dx,198,3,9);
-  ctx.restore();
+ // Fit the sliding panel inside the EXISTING painted glass track.
+ // The old 89×68 threshold graphic projected as a floating opaque box above
+ // the sofa; remove it rather than invent a second balcony/background layer.
+ const dx=balconyOpening*56;
+ ctx.save();
+ ctx.globalAlpha=.78;
+ ctx.fillStyle='rgba(116,169,172,.16)';
+ ctx.fillRect(586+dx,164,55,34);
+ ctx.strokeStyle='#c4d6cf';ctx.lineWidth=2.3;
+ ctx.strokeRect(586+dx,162,55,37);
+ ctx.strokeStyle='rgba(45,71,74,.55)';ctx.lineWidth=1;
+ ctx.beginPath();ctx.moveTo(587+dx,191);ctx.lineTo(640+dx,191);ctx.stroke();
+ ctx.fillStyle='rgba(240,231,204,.74)';ctx.fillRect(590+dx,179,2,7);
+ ctx.restore();
 }
 let bedroomDoorAngle=0,frontDoorMotion=0,bathDoorMotion=0;
 function drawPhysicalDoors(){
@@ -504,7 +509,8 @@ function renderRest(p){
  if(p.type==='shower'){drawShower(p);return}
  if(p.type==='sit'){
   if(p.id==='piano')drawPianoPlaying(p);
-  else drawSitting(p.x,p.y+(p.id==='sofa'?10:0),p.face,0,1,1,p.id==='beanbag');
+  else if(p.id==='sofa')drawSitting(p.x,p.y-26,p.face,0,1,.78,false); // feet remain on the sofa, not the coffee table
+  else drawSitting(p.x,p.y,p.face,0,1,1,p.id==='beanbag');
  }
 
  else drawReclining(p);
