@@ -20,20 +20,21 @@ jobs:
           import zipfile,os,json,collections
           z=zipfile.ZipFile('ThePianistAndroid-GitHubBuild-v0.4.5.zip')
           files=[i for i in z.infolist() if not i.is_dir()]
-          allowed={'.js','.ts','.tsx','.jsx','.html','.css','.json','.xml','.java','.kt','.gradle','.kts','.md','.txt','.properties','.yml','.yaml','.svg','.webmanifest'}
-          omit=('signing/','.git/','/build/','.gradle/','.jks','.keystore')
+          allowed={'.js','.ts','.tsx','.jsx','.html','.css','.json','.xml','.java','.kt','.gradle','.kts','.md','.txt','.properties','.yml','.yaml','.svg','.webmanifest','.png','.jpg','.jpeg','.webp'}
+          omit=('signing/','.git/','/build/','.gradle/','.jks','.keystore','app/build.gradle')
           os.makedirs('editable',exist_ok=True)
           manifest=[]
           for i in files:
               n=i.filename
               manifest.append({'path':n,'bytes':i.file_size,'compressed':i.compress_size})
               ext=os.path.splitext(n)[1].lower()
-              if ext in allowed and not any(t in n.lower() for t in omit) and i.file_size<1000000:
+              if ext in allowed and not any(t in n.lower() for t in omit) and i.file_size<2000000:
                   dest=os.path.join('editable',n)
                   os.makedirs(os.path.dirname(dest),exist_ok=True)
                   data=z.read(n)
-                  try: data.decode('utf-8')
-                  except UnicodeError: continue
+                  if ext not in ('.png','.jpg','.jpeg','.webp'):
+                      try: data.decode('utf-8')
+                      except UnicodeError: continue
                   with open(dest,'wb') as f:f.write(data)
           with open('editable/ASSET_INVENTORY.json','w') as f: json.dump(manifest,f,indent=2)
           with open('editable/README.md','w') as f:
