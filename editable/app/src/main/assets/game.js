@@ -509,8 +509,10 @@ function renderRest(p){
  if(p.type==='shower'){drawShower(p);return}
  if(p.type==='sit'){
   if(p.id==='piano')drawPianoPlaying(p);
-  else if(p.id==='sofa')drawSitting(p.x,p.y-26,p.face,0,1,.78,false); // feet remain on the sofa, not the coffee table
-  else drawSitting(p.x,p.y,p.face,0,1,1,p.id==='beanbag');
+  else if(p.id==='sofa')drawSitting(p.x,p.y-26,p.face,0,1,.78,false); // feet stay on the sofa
+  else if(p.id==='balchair')drawSitting(p.x,p.y-38,p.face,0,1,.75,false); // seat, not railing
+  else if(p.id==='beanbag')drawSitting(p.x,p.y-38,p.face,0,1,.75,true); // sit within cushion
+  else drawSitting(p.x,p.y,p.face,0,1,1,false);
  }
 
  else drawReclining(p);
