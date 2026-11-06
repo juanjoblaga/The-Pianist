@@ -49,6 +49,6 @@ test('all 13 objects are reachable on 8-way movement grid',()=>{
  assert.deepEqual(config.objects.filter(o=>!found.has(o.id)).map(o=>o.id),[],'Unreachable interactions');
 });
 test('bed lie uses approved available sprite, and QA hook is opt-in',()=>{
- assert(game.includes('const img=files.idle_indoor;'));
+ assert(game.includes('const img=files[spriteFile.idle];'));
  assert(game.includes("URLSearchParams(location.search).has('qa')"));
 });
