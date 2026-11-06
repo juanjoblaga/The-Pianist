@@ -1,5 +1,5 @@
 (()=>{'use strict';
-// The Pianist v0.4.5 — approved dialogue, portraits, shower, mirror, elevated city environment.
+// The Pianist v0.5.0 — approved dialogue, portraits, shower, mirror, elevated city environment.
 const W=1536,H=899,canvas=document.querySelector('#game'),ctx=canvas.getContext('2d',{alpha:false});
 canvas.width=W;canvas.height=H;ctx.imageSmoothingEnabled=true;
 // Keep only one fully decoded time-of-day scene in memory. A second scene is
@@ -100,27 +100,14 @@ dialogue.addEventListener('pointerdown',e=>{
 // rooms is defined in game-config.js.
 // solids is defined in game-config.js.
 // Feet anchored to floor; narrow enough to approach walls, never walk on walls.
-const R=9;
-const inRoom=(x,y)=>rooms.some(([a,b,c,d])=>x>=a+R&&x<=c-R&&y>=b+R&&y<=d-R);
-const overlap=(x,y,b)=>x+R>b[0]&&x-R<b[2]&&y+R>b[1]&&y-R<b[3];
-function passable(x,y){return inRoom(x,y)&&!solids.some(b=>overlap(x,y,b))}
-function distanceToRect(x,y,b){const ax=clamp(x,b[0],b[2]),ay=clamp(y,b[1],b[3]);return [Math.hypot(ax-x,ay-y),ax-x,ay-y]}
-const vector={down:[0,1],up:[0,-1],left:[-1,0],right:[1,0], 'down-left':[-.707,.707], 'down-right':[.707,.707],'up-left':[-.707,-.707],'up-right':[.707,-.707]};
-// objects is defined in game-config.js.
-function nearest(){let best=null,dBest=Infinity;const [fx,fy]=vector[player.dir];for(const obj of objects){const [dist,dx,dy]=distanceToRect(player.x,player.y,obj.rect);if(dist>obj.reach)continue;let dot=(dx*fx+dy*fy)/Math.max(dist,.001);if(dist>19&&dot<.08)continue;if(dist<dBest){best=obj;dBest=dist}}return best}
-// furniture is defined in game-config.js.
+const physics=window.ThePianistPhysics.create(window.ThePianistConfig,9);
+const passable=physics.passable;
+const nearest=()=>physics.nearest(player.x,player.y,player.dir);
 function changePose(id,type){if(id==='sofa'&&type==='lie')return;const data=furniture[id]?.[type];if(!data)return;const fromX=player.x,fromY=player.y;const approach=data.exit;
  // Reach condition enforced by nearest(); move towards a nearby safe approach point.
  player.transition={kind:'enter',id,type,t:0,fromX,fromY,toX:data.x,toY:data.y,exit:approach,face:data.face};
  player.moving=false;player.phase=0;resetJoystick();}
-function safeExit(target){
- if(passable(target.x,target.y))return target;
- for(let r=8;r<=112;r+=8)for(let a=0;a<24;a++){
-  const th=a*Math.PI/12,x=target.x+Math.cos(th)*r,y=target.y+Math.sin(th)*r;
-  if(passable(x,y))return {x,y};
- }
- return {x:player.x,y:player.y};
-}
+function safeExit(target){return physics.safeExit(target,{x:730,y:570});}
 function stand(){const old=player.pose;if(!old)return;
  const exit=safeExit(old.exit);
  player.transition={kind:'leave',id:old.id,type:old.type,t:0,fromX:player.x,fromY:player.y,toX:exit.x,toY:exit.y,exit,face:old.face};player.pose=null}
@@ -185,15 +172,7 @@ function drawPhysicalDoors(){
   ctx.rotate(-.28*ease(frontDoorMotion));ctx.drawImage(front,704-719,801-811);ctx.restore();}
  if(bath?.complete&&bath.naturalWidth){ctx.save();ctx.translate(984,739);
   ctx.rotate(-.55*ease(bathDoorMotion));ctx.drawImage(bath,978-984,733-739);ctx.restore();}
- // Bedroom doorway has no original leaf to duplicate; introduce a single oak door in its frame.
- if(bedroomDoorAngle>.10){const hingeX=914,hingeY=517;
-  ctx.save();ctx.globalAlpha=Math.min(1,bedroomDoorAngle*2.4);
-  ctx.translate(hingeX,hingeY);ctx.rotate(-bedroomDoorAngle*1.33);
-  ctx.fillStyle='#3b2b27';ctx.fillRect(-5,0,10,82);
-  ctx.fillStyle='#866047';ctx.fillRect(-2,2,7,78);
-  ctx.fillStyle='#b98b63';ctx.fillRect(1,3,2,73);
-  ctx.fillStyle='#e8c889';ctx.fillRect(1,56,3,5);
-  ctx.restore();}
+ // Bedroom entrance uses the painted architecture; no duplicated swinging leaf.
 }
 function updateDoors(dt){
  const bedroomNear=Math.hypot(player.x-922,player.y-554)<115;
@@ -487,16 +466,19 @@ function drawPianoPlaying(p){
  ctx.drawImage(img,frame*128,0,128,170,p.x-w/2,p.y-h,w,h);
  ctx.restore();ctx.imageSmoothingEnabled=true;
 }
+// Lying in a top-down bed: the body is under the duvet; the approved head and
+// shoulders remain on the pillow. Never crop an unrelated walking animation.
 function drawReclining(p){
- if(p.id==='bed'){
-  const img=files.walk_indoor;
-  if(img?.complete&&img.naturalWidth){ctx.save();ctx.filter=actorFilter(p.x,p.y);
-   ctx.imageSmoothingEnabled=false;ctx.drawImage(img,3,4,74,64,p.x-50,p.y-70,100,84);ctx.restore();}
-  return;
- }
- // Sofa lying has been intentionally removed: previous sprites failed human anatomy and visual QA.
- // No fallback or old sprite is drawn. This can return only after a user-approved real animation.
-
+ if(p.id!=='bed')return; // Sofa lying remains intentionally disabled.
+ const img=files.idle_indoor;
+ if(!img?.complete||!img.naturalWidth)return;
+ ctx.save();ctx.filter=actorFilter(p.x,p.y);ctx.imageSmoothingEnabled=false;
+ // Natural upper-body overlap under the blanket, not a detached floating head.
+ ctx.fillStyle='#292b35';
+ ctx.beginPath();ctx.ellipse(p.x,p.y+6,30,32,0,0,Math.PI*2);ctx.fill();
+ // The front-facing head from the approved character sheet; remainder is covered.
+ ctx.drawImage(img,0,2,80,63,p.x-40,p.y-80,80,71);
+ ctx.restore();ctx.imageSmoothingEnabled=true;
 }
 function drawShower(p){
  // No unclothed character artwork: a discreet opaque mosaic and small water ripples
@@ -530,10 +512,7 @@ function renderRest(p){
   if(p.type==='lie'){
    const img=files.duvet_foreground;
    if(img.complete&&img.naturalWidth){ctx.save();ctx.drawImage(img,994,338,222,130);ctx.restore();}
-  } else{
-   const img=files['light_'+lightMode];
-   if(img.complete&&img.naturalWidth)ctx.drawImage(img,1002,514,209,30,1002,514,209,30);
-  }
+  } // No transplanted art strip over the seated sprite or bed footboard.
  }
  // Beanbag artwork is a single integrated cushion: no 9px furniture strip
  // is pasted over the character's feet (it previously cut them in half).
@@ -541,7 +520,7 @@ function renderRest(p){
 }
 function drawShoesAtEntrance(){
  // Character removes shoes at entrance. Existing interior sprites have charcoal socks.
- const img=files.walk_indoor;if(!img?.complete||!img.naturalWidth)return;
+ // Shoes are rendered from shapes: no sprite atlas must be loaded to show them.
  ctx.save();ctx.fillStyle='rgba(22,24,28,.23)';ctx.beginPath();ctx.ellipse(830,854,23,7,0,0,Math.PI*2);ctx.fill();
  // Two understated shoes beside the mat, not blocking movement.
  ctx.fillStyle='#29262a';ctx.strokeStyle='#1b1b20';ctx.lineWidth=2;
@@ -716,5 +695,5 @@ window.addEventListener('blur',()=>{keyState.clear();resetJoystick();audioSuspen
 window.addEventListener('focus',()=>{if(!gamePaused)audioResume()});
 $('#help').onclick=()=>{$('#modal').hidden=false;resetJoystick()};$('#close').onclick=()=>$('#modal').hidden=true;
 // Debug-only hooks for screenshot/geometry tests, inert during normal play.
-window.__pianistTest={getState:()=>({x:player.x,y:player.y,dir:player.dir,pose:player.pose,lightMode,weather,cameraY,balconyOpening,layout,gamePaused,ambientOn,speed:player.speed,bedroomDoorAngle,frontDoorMotion,bathDoorMotion}),setPlayer:(x,y,dir)=>{player.x=x;player.y=y;player.dir=dir||player.dir;player.pose=null;player.transition=null},setPose:(id,type)=>{const f=furniture[id]?.[type];if(f){player.transition=null;player.pose={id,type,x:f.x,y:f.y,exit:f.exit,face:f.face};player.x=f.x;player.y=f.y;}},setLighting,setWeather,passable,rooms,solids,objects,dialogueScript,interact,actorFilter,enterBackground,enterForeground,placeControls,isReady:()=>ready,loadedImages:()=>Object.keys(files).filter(n=>files[n]?.naturalWidth)};
+if(new URLSearchParams(location.search).has('qa'))window.__pianistTest={getState:()=>({x:player.x,y:player.y,dir:player.dir,pose:player.pose,lightMode,weather,cameraY,balconyOpening,layout,gamePaused,ambientOn,speed:player.speed,bedroomDoorAngle,frontDoorMotion,bathDoorMotion}),setPlayer:(x,y,dir)=>{player.x=x;player.y=y;player.dir=dir||player.dir;player.pose=null;player.transition=null},setPose:(id,type)=>{const f=furniture[id]?.[type];if(f){player.transition=null;player.pose={id,type,x:f.x,y:f.y,exit:f.exit,face:f.face};player.x=f.x;player.y=f.y;}},setLighting,setWeather,passable,rooms,solids,objects,dialogueScript,interact,actorFilter,enterBackground,enterForeground,placeControls,isReady:()=>ready,loadedImages:()=>Object.keys(files).filter(n=>files[n]?.naturalWidth)};
 })();
