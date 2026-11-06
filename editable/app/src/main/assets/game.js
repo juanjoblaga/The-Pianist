@@ -5,9 +5,9 @@ canvas.width=W;canvas.height=H;ctx.imageSmoothingEnabled=true;
 // Keep only one fully decoded time-of-day scene in memory. A second scene is
 // temporarily retained during a requested transition, then released.
 const files=Object.create(null);
-const modes=['sunrise','morning','afternoon','sunset','night'];
-const modePrefixes=['world','light','frontdoor','bathdoor'];
-const persistentAssets=['walk_cycle_v045','idle_indoor','diagonal_indoor','sitting_indoor','beanbag_clean_v042','piano_play_v045','diagonal_walk_v045','duvet_foreground','balcony_threshold'];
+const art=window.ThePianistAssets;
+const modes=art.modes,modePrefixes=art.modeLayers,persistentAssets=art.persistentAssets;
+const spriteFile=art.sprites;
 const assetPromises=Object.create(null);
 const imageExtension=n=>n.startsWith('world_')||n.startsWith('light_')?'jpg':'png';
 function ensureAsset(name){
@@ -154,7 +154,7 @@ function interact(){
 // Do not paint a second swinging door OVER their already-painted leaves.
 // The balcony slider is a separate, physical opening with no duplicated base leaf.
 function drawBalconyDoor(){
-  const img=files.balcony_threshold;
+  const img=files[spriteFile.balconyThreshold];
   if(img.complete&&img.naturalWidth)ctx.drawImage(img,574,171,89,68);
   const dx=balconyOpening*64;
   ctx.save();ctx.globalAlpha=.93;
@@ -432,7 +432,7 @@ function ambientDust(){if(lightMode==='night'||weather==='storm'||weather==='rai
 const spriteRow={down:0,left:1,right:2,up:3,'down-left':4,'down-right':5,'up-left':6,'up-right':7};
 function drawWalking(x,y,dir,moving,phase,opacity=1,scale=1){
  const diagonal=dir.includes('-');
- const img=moving?(diagonal?files.diagonal_walk_v045:files.walk_cycle_v045):files.idle_indoor;
+ const img=moving?(diagonal?files[spriteFile.diagonalWalk]:files[spriteFile.walk]):files[spriteFile.idle];
  if(!img?.complete||!img.naturalWidth)return;
  ctx.save();ctx.globalAlpha=opacity;ctx.imageSmoothingEnabled=false;ctx.filter=actorFilter(x,y);
  const fw=101*scale,fh=143*scale;
@@ -449,7 +449,7 @@ function drawWalking(x,y,dir,moving,phase,opacity=1,scale=1){
 }
 function drawSitting(x,y,face,phase,opacity=1,scale=1,beanbag=false){
  // Individually approved seated artwork contains the human ONLY, never a chair.
- const img=beanbag?files.beanbag_clean_v042:files.sitting_indoor;
+ const img=beanbag?files[spriteFile.beanbagSit]:files[spriteFile.sit];
  if(!img?.complete||!img.naturalWidth)return;
  const index=face==='right'?2:face==='left'?1:face==='up'?3:0;
  ctx.save();ctx.globalAlpha=opacity;ctx.imageSmoothingEnabled=false;ctx.filter=actorFilter(x,y);
@@ -459,7 +459,7 @@ function drawSitting(x,y,face,phase,opacity=1,scale=1,beanbag=false){
  ctx.restore();ctx.imageSmoothingEnabled=true;
 }
 function drawPianoPlaying(p){
- const img=files.piano_play_v045;if(!img?.complete||!img.naturalWidth)return;
+ const img=files[spriteFile.piano];if(!img?.complete||!img.naturalWidth)return;
  // Dedicated right-facing pianist. Arm and fingers extend to the visible keys.
  const w=116,h=150,frame=Math.floor(time*5)%4;
  ctx.save();ctx.filter=actorFilter(p.x,p.y);ctx.imageSmoothingEnabled=false;
@@ -470,7 +470,7 @@ function drawPianoPlaying(p){
 // shoulders remain on the pillow. Never crop an unrelated walking animation.
 function drawReclining(p){
  if(p.id!=='bed')return; // Sofa lying remains intentionally disabled.
- const img=files.idle_indoor;
+ const img=files[spriteFile.idle];
  if(!img?.complete||!img.naturalWidth)return;
  ctx.save();ctx.filter=actorFilter(p.x,p.y);ctx.imageSmoothingEnabled=false;
  // Natural upper-body overlap under the blanket, not a detached floating head.
@@ -510,7 +510,7 @@ function renderRest(p){
  else drawReclining(p);
  if(p.id==='bed'){
   if(p.type==='lie'){
-   const img=files.duvet_foreground;
+   const img=files[spriteFile.duvet];
    if(img.complete&&img.naturalWidth){ctx.save();ctx.drawImage(img,994,338,222,130);ctx.restore();}
   } // No transplanted art strip over the seated sprite or bed footboard.
  }
