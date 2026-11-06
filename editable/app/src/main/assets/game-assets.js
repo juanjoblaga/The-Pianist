@@ -15,8 +15,7 @@ const catalog={
   sit:'sitting_indoor',
   beanbagSit:'beanbag_clean_v042',
   piano:'piano_play_v045',
-  duvet:'duvet_foreground',
-  balconyThreshold:'balcony_threshold'
+  duvet:'duvet_foreground'
  },
  atlas:{
   idle:{columns:4,rows:1,width:80,height:112},
