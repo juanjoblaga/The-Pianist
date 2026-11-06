@@ -31,8 +31,8 @@ const rooms=[
 ];
 
 const solids=[
- [275,202,581,306],[273,281,380,385],// sectional sofa
- [431,322,551,405],                   // coffee table
+ [275,202,581,303],[273,281,380,385],// sectional sofa
+ [431,333,551,405],                   // coffee table
  [246,270,280,472],                   // shelves
  [383,464,580,614],                   // dining table
  [772,215,874,456],                   // piano
@@ -43,7 +43,7 @@ const solids=[
  [357,54,430,135],[445,52,492,135],[722,50,805,145], // balcony furniture
  [230,13,838,52],                   // rear railing base
  [235,160,579,177],[655,160,832,177],// balcony glass base (only doorway open)
- [864,121,920,380],                 // bedroom dividing wall
+ [864,121,920,450],                 // bedroom dividing wall
  [928,548,960,621],                 // bathroom outside corner, narrow wall
  [964,544,1358,568],               // bathroom north wall
  [984,572,1001,624],                // bathroom door frame
