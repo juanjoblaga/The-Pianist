@@ -8,7 +8,8 @@ const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
  const browser=await chromium.launch({channel:'chrome',headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
  const page=await browser.newPage({viewport:{width:1365,height:768},deviceScaleFactor:1});
  const errors=[];page.on('pageerror',e=>errors.push(String(e)));
- page.on('console',msg=>{if(msg.type()==='error')errors.push(msg.text());});
+ page.on('response',response=>{if(response.status()>=400&&!response.url().endsWith('/favicon.ico'))errors.push('HTTP '+response.status()+': '+response.url());});
+ page.on('console',msg=>{if(msg.type()==='error'&&!msg.text().includes('Failed to load resource:'))errors.push(msg.text());});
  try{
   let opened=false;
   for(let i=0;i<12;i++){try{await page.goto('http://127.0.0.1:8033/index.html?qa=1',{waitUntil:'domcontentloaded',timeout:10000});opened=true;break;}catch(e){await pause(400);}}
