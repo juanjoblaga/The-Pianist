@@ -67,6 +67,26 @@ const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
   assert.equal((await page.evaluate(()=>window.__pianistTest.getState().pose)).id,'sofa');
   await page.screenshot({path:imageDir+'/03-sofa-seated.png'});
   await page.evaluate(()=>window.__pianistTest.interact());await pause(850);
+  // Additional pose tour: inspect actual piano hands, bed seating and beanbag/chair.
+  const poseCases=[
+    ['piano',730,420,'right','Play','06-piano-playing.png'],
+    ['bed',1103,525,'up','Sit','07-bed-seated.png'],
+    ['beanbag',690,115,'right','Sit','08-beanbag-seated.png'],
+    ['balchair',517,122,'left','Sit','09-balcony-chair.png']
+  ];
+  for(const [id,x,y,dir,choice,shot] of poseCases){
+    await page.evaluate(({x,y,dir})=>window.__pianistTest.setPlayer(x,y,dir),{x,y,dir});
+    await page.evaluate(()=>window.__pianistTest.interact());
+    await page.getByRole('button',{name:choice,exact:true}).dispatchEvent('pointerdown',{bubbles:true});
+    await pause(820);
+    const seated=await page.evaluate(()=>window.__pianistTest.getState());
+    assert(seated.pose&&seated.pose.id===id,'Pose failed: '+id);
+    await page.screenshot({path:imageDir+'/'+shot});
+    await page.evaluate(()=>window.__pianistTest.interact());await pause(820);
+    const exited=await page.evaluate(()=>window.__pianistTest.getState());
+    assert.equal(exited.pose,null,'Stuck after '+id);
+    assert(await page.evaluate(()=>window.__pianistTest.passable(window.__pianistTest.getState().x,window.__pianistTest.getState().y)),id+' exit blocked');
+  }
   // Shower: privacy glass and completion dialogue, no stuck pose.
   await page.evaluate(()=>window.__pianistTest.setPlayer(1250,590,'right'));
   await page.evaluate(()=>window.__pianistTest.interact());
@@ -110,6 +130,6 @@ const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
   await page.waitForFunction(()=>window.__pianistTest?.isReady(),{timeout:30000});
   assert.equal((await page.evaluate(()=>window.__pianistTest.getState())).layout.pad.size,136);
   if(errors.length)throw new Error('Browser errors: '+errors.join('; '));
-  console.log('PASS: browser tour, 13 interactables, poses, shower, keyboard, weather, controls, screenshots');
+  console.log('PASS: real browser, 13 interactables, six seating/lying poses, shower, diagonal, weather, controls, screenshots');
  }finally{await browser.close();}
 })().catch(err=>{console.error(err);process.exitCode=1;});
