@@ -90,9 +90,13 @@ const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
   }
   await page.evaluate(()=>window.__pianistTest.setWeather('rainy'));
   await page.screenshot({path:imageDir+'/05-rainy-evening.png'});
+  await page.locator('#weather').click();
   const sound=page.locator('#sound');
-  await sound.click({force:true});
+  const audioInitiallyOn=await sound.getAttribute('aria-pressed');
+  if(audioInitiallyOn==='true'){await sound.click();assert.equal(await sound.getAttribute('aria-pressed'),'false');}
+  await sound.click();
   assert.equal(await sound.getAttribute('aria-pressed'),'true');
+  await page.locator('#weather').click();
   await page.evaluate(()=>window.__pianistTest.enterBackground());
   assert.equal((await page.evaluate(()=>window.__pianistTest.getState())).gamePaused,true);
   await page.evaluate(()=>window.__pianistTest.enterForeground());
