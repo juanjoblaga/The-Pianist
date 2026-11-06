@@ -1,0 +1,49 @@
+name: Extract editable The Pianist sources
+on:
+  push:
+    branches: [audit/gameplay-engine-refactor-v0-5]
+    paths: [.github/workflows/extract-editable.yml]
+permissions:
+  contents: write
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect and extract text code
+        shell: bash
+        run: |
+          set -euo pipefail
+          ZIP=ThePianistAndroid-GitHubBuild-v0.4.5.zip
+          unzip -tq "$ZIP"
+          python3 - <<'PY'
+          import zipfile,os,json,collections
+          z=zipfile.ZipFile('ThePianistAndroid-GitHubBuild-v0.4.5.zip')
+          files=[i for i in z.infolist() if not i.is_dir()]
+          allowed={'.js','.ts','.tsx','.jsx','.html','.css','.json','.xml','.java','.kt','.gradle','.kts','.md','.txt','.properties','.yml','.yaml','.svg','.webmanifest'}
+          omit=('signing/','.git/','/build/','.gradle/','.jks','.keystore')
+          os.makedirs('editable',exist_ok=True)
+          manifest=[]
+          for i in files:
+              n=i.filename
+              manifest.append({'path':n,'bytes':i.file_size,'compressed':i.compress_size})
+              ext=os.path.splitext(n)[1].lower()
+              if ext in allowed and not any(t in n.lower() for t in omit) and i.file_size<1000000:
+                  dest=os.path.join('editable',n)
+                  os.makedirs(os.path.dirname(dest),exist_ok=True)
+                  data=z.read(n)
+                  try: data.decode('utf-8')
+                  except UnicodeError: continue
+                  with open(dest,'wb') as f:f.write(data)
+          with open('editable/ASSET_INVENTORY.json','w') as f: json.dump(manifest,f,indent=2)
+          with open('editable/README.md','w') as f:
+              f.write('# Editable source working tree\n\nGenerated from the original v0.4.5 ZIP. Editing files here is safe; signing material stays in the private baseline ZIP. The build overlay will use these files.\n')
+          print('FILES',len(files),'EXTRACTED',sum(len(fs) for _,_,fs in os.walk('editable')),'total uncompressed',sum(i.file_size for i in files))
+          print('\n'.join(f'{i.filename}: {i.file_size}' for i in files[:200]))
+          PY
+      - name: Commit extracted source
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add editable/
+          git diff --cached --quiet || (git commit -m 'chore: expose editable text sources and asset inventory' && git push)
