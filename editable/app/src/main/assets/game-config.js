@@ -52,7 +52,7 @@ const solids=[
 
 const objects=[
  {id:'piano',name:'Piano',rect:[772,215,874,455],reach:66,poses:['sit']},
- {id:'sofa',name:'Sofa',rect:[280,201,581,382],reach:58,poses:['sit']},
+ {id:'sofa',name:'Sofa',rect:[280,201,581,382],reach:58,poses:['sit','lie']},
  // Coffee table, dining table, plants and intercom are DECORATIVE, by request.
  {id:'kitchen',name:'Kitchen',rect:[235,477,285,675],reach:49},
  {id:'kitchen2',name:'Kitchen counter',rect:[285,661,643,766],reach:48},
@@ -68,12 +68,14 @@ const objects=[
 ];
 
 const furniture={
- sofa:{sit:{x:447,y:341,face:'down',exit:{x:465,y:426}}},
- bed:{sit:{x:1103,y:517,face:'down',exit:{x:1103,y:526}},lie:{x:1104,y:347,face:'up',exit:{x:1103,y:526}}},
- balchair:{sit:{x:470,y:178,face:'left',exit:{x:527,y:144}}},
- beanbag:{sit:{x:760,y:172,face:'down',exit:{x:681,y:144}}},
+ // Furniture anchors are virtual canvas pixels, not walking destinations.
+ // Each seat returns the player to their actual pre-interaction floor position.
+ sofa:{sit:{x:450,y:307,face:'down',exit:{x:465,y:426}},lie:{x:451,y:286,face:'right',exit:{x:465,y:426}}},
+ bed:{sit:{x:1103,y:502,face:'down',exit:{x:1103,y:526}},lie:{x:1104,y:289,face:'up',exit:{x:1103,y:526}}},
+ balchair:{sit:{x:470,y:149,face:'left',exit:{x:527,y:144}}},
+ beanbag:{sit:{x:759,y:149,face:'down',exit:{x:681,y:144}}},
  piano:{sit:{x:758,y:423,face:'right',exit:{x:699,y:420}}},
- shower:{shower:{x:1315,y:671,face:'up',exit:{x:1249,y:590}}}
+ shower:{shower:{x:1315,y:671,face:'up',exit:{x:1060,y:720}}}
 };
 
 const config={dialogueScript,rooms,solids,objects,furniture};
