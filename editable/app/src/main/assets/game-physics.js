@@ -22,13 +22,24 @@ function create(config,footRadius=9) {
   function passable(x,y){return inRoom(x,y)&&!solids.some(b=>overlaps(x,y,b));}
   function distanceToRect(x,y,b){const ax=clamp(x,b[0],b[2]),ay=clamp(y,b[1],b[3]);return [Math.hypot(ax-x,ay-y),ax-x,ay-y];}
   function nearest(x,y,dir='down'){
-    let best=null,dBest=Infinity;const [fx,fy]=vectors[dir]||vectors.down;
+    const [fx,fy]=vectors[dir]||vectors.down;
+    let best=null,bestScore=Infinity;
     for(const obj of objects){
       const [dist,dx,dy]=distanceToRect(x,y,obj.rect);
       if(dist>obj.reach)continue;
-      const dot=(dx*fx+dy*fy)/Math.max(dist,.001);
-      if(dist>19&&dot<.08)continue;
-      if(dist<dBest){best=obj;dBest=dist;}
+      // Direction matters EVEN when near two adjoining bathroom fixtures.
+      // The old distance-only selection would choose the toilet while facing
+      // the mirror, or the sink while facing the shower.
+      let vx=dx,vy=dy,distToAim=dist;
+      if(dist<1){
+        vx=(obj.rect[0]+obj.rect[2])/2-x;
+        vy=(obj.rect[1]+obj.rect[3])/2-y;
+        distToAim=Math.hypot(vx,vy);
+      }
+      const dot=distToAim<.001?1:(vx*fx+vy*fy)/distToAim;
+      if(dot<.28)continue;
+      const score=dist+24*(1-dot);
+      if(score<bestScore){best=obj;bestScore=score;}
     }
     return best;
   }
