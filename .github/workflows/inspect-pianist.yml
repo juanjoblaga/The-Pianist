@@ -1,0 +1,51 @@
+name: Inspect The Pianist game source
+on:
+  push:
+    paths:
+      - '.github/workflows/inspect-pianist.yml'
+  workflow_dispatch:
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect archived game (read-only)
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import glob, zipfile, re, os
+          paths=sorted(glob.glob("ThePianistAndroid-GitHubBuild-v*.zip"))
+          if not paths: raise SystemExit("No source ZIP")
+          path=paths[-1]
+          with zipfile.ZipFile(path) as z:
+              infos=z.infolist()
+              print("AUDIT ZIP:", path, "size:", os.stat(path).st_size, "members:", len(infos))
+              print("=== FILE MANIFEST START ===")
+              for i in infos:
+                  if i.filename.endswith('/'): continue
+                  print(str(i.file_size).rjust(9), i.filename)
+              print("=== FILE MANIFEST END ===")
+              matches=re.compile(r'sprite|piano|sitt|lie|lying|lay|sofa|bed|shower|dialog|draw|interact|sheet|frame|animat|scale|touch|joystick|canvas|action',re.I)
+              sources=[i for i in infos if i.filename.lower().endswith(('.js','.html','.css','.java','.kt','.gradle','.json','.xml')) and 0<i.file_size<1000000]
+              print("=== SOURCE MATCHES START ===")
+              for i in sources:
+                  if i.filename.lower().endswith(('package-lock.json','gradle-wrapper.properties')): continue
+                  try: s=z.read(i).decode('utf-8')
+                  except UnicodeError: continue
+                  lines=s.splitlines()
+                  indices=[idx for idx,line in enumerate(lines) if matches.search(line)]
+                  if not indices: continue
+                  print("=== SOURCE:",i.filename,"LINES",len(lines),"MATCHES",len(indices),"===")
+                  if len(lines)<500 and len(indices)<100:
+                      print('\n'.join(f"{j+1:04d}: {ln[:300]}" for j,ln in enumerate(lines)))
+                  else:
+                      chosen=set()
+                      for j in indices[:130]:
+                          for k in range(max(0,j-2),min(len(lines),j+3)): chosen.add(k)
+                      for j in sorted(chosen):
+                          print(f"{j+1:04d}: {lines[j][:400]}")
+              print("=== SOURCE MATCHES END ===")
+          PY
