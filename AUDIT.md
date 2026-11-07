@@ -10,6 +10,7 @@ This review starts from the user's approved v0.4.5 ZIP, not a redesigned game. *
 | Bed — sitting | Old code pasted an unrelated image strip over the sitter | Remove misplaced cover strip | Browser sitting screenshot and on-phone review |
 | Sofa — sitting | Legs intruded into coffee-table space | Shorten visible seated height and move feet back onto sofa | Browser screenshot; real phone still needed |
 | Sofa — lying | Previous poses had incorrect human anatomy | Remains **disabled**; never auto-restore rejected artwork | Script assertion |
+| Balcony chair / beanbag | Seated sprites extended onto the glass railing | Adjust draw scale/anchor to sit on approved balcony furniture without relocating it | Browser pose screenshots and stand exit tests |
 | Sofa–table walkway | Two colliders left only a 16px passage for an 18px foot diameter | Fine-tune collision rectangles (no furniture relocation) | Geometry + full reachable grid |
 | Bedroom wall | Wall collision stopped too high, permitting wall crossing | Extend wall collision to painted wall end | Geometry negative assertions |
 | Bedroom extra door | A separate fake oak leaf was drawn over existing architecture | Remove extra simulated leaf | Browser screenshot; manual review |
