@@ -73,3 +73,21 @@ test('poses and release rendering avoid old unnatural assets',()=>{
  assert(!game.includes("const img=files[spriteFile.piano]"),'Do not restore distorted piano arm atlas');
  assert(!game.includes("ctx.drawImage(img,994,338,222,130)"),'No duplicate duvet over torso');
 });
+
+test('head proportions, sofa lying pose and piano bench alignment',()=>{
+ const bed=visuals.bed.lie;
+ assert(Math.abs(bed.headWidth/80-bed.headHeight/54)<.025,
+  'Bed must scale the original face uniformly, never narrower than standing');
+ assert(game.includes("ctx.drawImage(img,0,0,80,54,p.x+50-w/2"),
+  'Sofa should have an upright approved head at the body-end cushion');
+ assert(!game.includes("ctx.drawImage(img,80,0,80,112,-38,-79"),
+  'Do not rotate an entire upright character sideways for sofa lying');
+ const p=config.furniture.piano.sit;
+ assert(p.x>=728&&p.x<=750&&p.y>=395&&p.y<=415,
+  'Piano pose should sit on the bench, not in front of it');
+ assert(p.x+40>=782&&p.x+40<=795,
+  'Finger tips should reach the existing keybed x=782..795');
+ assert(visuals.piano.sit.handTravel<=4,'Hand articulation should be small and natural');
+ assert(game.includes('const leftTap=Math.sin(beat)')&&game.includes('const rightTap=Math.sin(beat*1.13+1.9)'),
+  'Hands must have independent note motions; avoid giant straight-arm frame');
+});
