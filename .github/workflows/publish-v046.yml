@@ -1,0 +1,76 @@
+name: Publish The Pianist v0.4.6
+
+on:
+  push:
+    paths:
+      - '.pianist-transfer/v046/**'
+      - '.github/workflows/publish-v046.yml'
+  workflow_dispatch:
+
+jobs:
+  publish-and-build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      - name: Reassemble the exact verified v0.4.6 source ZIP
+        shell: bash
+        run: |
+          set -euo pipefail
+          ZIP="ThePianistAndroid-GitHubBuild-v0.4.6.zip"
+          if [ -d .pianist-transfer/v046 ]; then
+            cat .pianist-transfer/v046/part-*.bin > "$ZIP"
+          fi
+          echo "0108cf15aa60b0cf8caad4d2f383e81a199622e94b35b0ec38788fb4c6ec0cbc  $ZIP" | sha256sum -c -
+          unzip -tq "$ZIP"
+
+      - name: Commit source ZIP and remove temporary transfer segments
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [ -d .pianist-transfer/v046 ]; then
+            git rm -r .pianist-transfer/v046
+            git add ThePianistAndroid-GitHubBuild-v0.4.6.zip
+            git commit -m "Publish The Pianist v0.4.6 verified source archive"
+            git push origin HEAD:main
+          fi
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle 8.9
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Extract Android project
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build-project
+          unzip -q ThePianistAndroid-GitHubBuild-v0.4.6.zip -d build-project
+          test -f build-project/app/build.gradle
+
+      - name: Compile signed Android APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd build-project
+          gradle --no-daemon assembleDebug
+          mkdir -p ../apk-output
+          cp app/build/outputs/apk/debug/app-debug.apk ../apk-output/ThePianist-v0.4.6.apk
+
+      - name: Upload v0.4.6 APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ThePianist-v0.4.6-APK
+          path: apk-output/ThePianist-v0.4.6.apk
+          if-no-files-found: error
