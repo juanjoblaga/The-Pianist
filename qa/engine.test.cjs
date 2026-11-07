@@ -4,6 +4,7 @@ const assets=path.resolve(__dirname,'../editable/app/src/main/assets');
 const config=require(path.join(assets,'game-config.js'));
 const physics=require(path.join(assets,'game-physics.js')).create(config);
 const game=fs.readFileSync(path.join(assets,'game.js'),'utf8');
+const visuals=require(path.join(assets,'game-poses.js'));
 test('canonical dialogue and interactions',()=>{
  assert.equal(config.objects.length,13);
  assert.equal(new Set(config.objects.map(x=>x.id)).size,13);
@@ -31,7 +32,8 @@ test('furniture poses have valid safe exits',()=>{
    assert(Math.hypot(ex.x-p.exit.x,ex.y-p.exit.y)<145,id+' exit too far');
   }
  }
- assert(!config.furniture.sofa.lie);
+ assert(config.furniture.sofa.lie,'Sofa should offer a lying pose');
+ assert.equal(physics.passable(1060,720),true,'Shower needs a genuinely walkable exit');
 });
 test('all 13 objects are reachable on 8-way movement grid',()=>{
  const delta=[[8,0],[-8,0],[0,8],[0,-8],[8,8],[-8,8],[8,-8],[-8,-8]];
@@ -50,5 +52,24 @@ test('all 13 objects are reachable on 8-way movement grid',()=>{
 });
 test('bed lie uses approved available sprite, and QA hook is opt-in',()=>{
  assert(game.includes('const img=files[spriteFile.idle];'));
+ assert(visuals.sofa.lie&&visuals.bed.lie,'Both lying poses must be rendered');
+ for(const [id,types] of Object.entries(config.furniture))for(const type of Object.keys(types))assert(visuals[id]?.[type],id+' / '+type+' missing visual');
  assert(game.includes("URLSearchParams(location.search).has('qa')"));
+});
+test('nearby bathroom fixtures resolve by facing, not raw proximity',()=>{
+ const mirror=physics.nearest(1178,695,'up');
+ const toilet=physics.nearest(1207,603,'down');
+ const shower=physics.nearest(1250,590,'right');
+ assert.equal(mirror?.id,'mirror');
+ assert.equal(toilet?.id,'toilet');
+ assert.equal(shower?.id,'shower');
+ assert.notEqual(physics.nearest(1250,590,'left')?.id,'shower');
+});
+test('poses and release rendering avoid old unnatural assets',()=>{
+ assert.equal(config.furniture.bed.lie.y,325);
+ assert.equal(visuals.sofa.sit.scale,visuals.bed.sit.scale,'seating proportions should remain consistent');
+ assert(visuals.balchair.sit.scale>=.85&&visuals.beanbag.sit.scale>=.85);
+ assert(game.includes('const exit=id===\'shower\'?safeExit({x:1060,y:720})'),'shower must exit clear of walls');
+ assert(!game.includes("const img=files[spriteFile.piano]"),'Do not restore distorted piano arm atlas');
+ assert(!game.includes("ctx.drawImage(img,994,338,222,130)"),'No duplicate duvet over torso');
 });
