@@ -1,3 +1,9 @@
+## v0.5.1 visual/interaction review (draft)
+
+The app's user feedback identified defects that automated pass/fail scripts did not catch. This branch includes a reusable pose map (`game-poses.js`), natural floor-return transitions, a sofa reclining action, revised bed-head placement/sheet covering, safer shower staging, direction-aware bathroom targets with explicit action-button labels, and deterministically graded *exterior* daylight paintings.
+
+The four-frame exaggerated piano-arm atlas is deliberately not used: the approved seated sprite replaces it, with understated movement. Genuine new finger-playing artwork still requires art direction. The upright baked-in entrance/bathroom door panels are still present in the original `light_*.jpg` plates: changing code-only rotating overlays cannot fully repair those paintings. **Do not claim the doors are artistically finished or merge without visual acceptance.**
+
 # The Pianist — editable game source
 
 **This branch is an engineering/QA preview of the original v0.4.5 game.** It does not change the user's story, approved portraits, apartment layout or spoken dialogue.
@@ -32,7 +38,7 @@ The source of truth is now the `editable/` directory. The original v0.4.5 source
 
 The world has a virtual **1536×899** canvas. All collision and interaction rectangles are in virtual world coordinates *after image scaling*. Only the player's **foot circle** is solid (9px radius), not the visual head and shoulders. A pathway must be wide enough for that circle and connected to the other rooms.
 
-Bed rest shows the approved character's head and shoulders above the cover. The torso is tucked under the duvet. Sofa reclining **must remain disabled** until a genuinely human-looking approved animation exists.
+Bed rest shows the approved character's head and shoulders above the cover. The torso is tucked under the duvet. Sofa reclining was subsequently requested by the user in v0.5.1. It uses the approved existing sprite rotated to fit the sofa; the pose remains subject to the user's visual acceptance.
 
 Shower privacy uses the existing opaque mosaic. Window art remains visible but the bedroom window is intentionally **not** interactable.
 
@@ -41,7 +47,7 @@ Shower privacy uses the existing opaque mosaic. Window art remains visible but t
 - `com.thepianist.game` application ID and signing certificate cannot change in a normal update.
 - Keep control preferences under `thepianist.controls.v1` and audio preferences under `thepianist.sound.v1`.
 - Keep the original eight user-approved portrait PNGs.
-- Do not add a second balcony view, geometric trees, an outside map, a fake entrance scene or an unapproved sofa-lying pose.
+- Do not add a second balcony view, geometric trees, an outside map, a fake entrance scene or a new sofa-lying sprite without user review.
 - Do not revise author-supplied dialogue text or punctuation.
 - Do not ship automated CI success as proof that touch controls, sound or visual sprite quality were verified on an Android phone.
 
