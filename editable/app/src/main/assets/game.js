@@ -463,27 +463,16 @@ function drawSitting(x,y,face,phase,opacity=1,scale=1,beanbag=false){
  ctx.restore();ctx.imageSmoothingEnabled=true;
 }
 function drawPianoPlaying(p){
- // The piano is a narrow keybed at x≈786; the existing approved side-view
- // seated sprite already contains natural upper arms. Keep those and only
- // articulate short wrists/fingers at the keyboard—never stretch the arms.
+ // Reusable authored pixel-art atlas: the approved seated body with four
+ // independently moving finger/forearm poses, built from generate-piano-frames.
+ // No extra arms drawn onto a static pose and no elongated-arm image hacks.
+ const img=files[spriteFile.pianoMotion];
  const spec=poseStyles.piano.sit;
- drawSitting(p.x,p.y,'right',0,1,spec.scale);
- const beat=time*spec.beatsPerSecond*2*Math.PI;
- const leftTap=Math.sin(beat),rightTap=Math.sin(beat*1.13+1.9);
- const reach=spec.handTravel;
- const L={x:p.x+38+Math.sin(beat*.37)*1.2,y:p.y-57+leftTap*reach};
- const R={x:p.x+40+Math.cos(beat*.29)*1.4,y:p.y-45+rightTap*reach};
- ctx.save();ctx.imageSmoothingEnabled=false;
- // Small elbow-to-wrist extensions, following the two real original arms.
- // Both hands reach different notes on the existing keyboard plane.
- for(const [startX,startY,hand] of [[p.x+21,p.y-54,L],[p.x+23,p.y-46,R]]){
-  ctx.strokeStyle='#2c272e';ctx.lineWidth=5;
-  ctx.beginPath();ctx.moveTo(startX,startY);ctx.quadraticCurveTo(startX+10,startY+4,hand.x-3,hand.y);ctx.stroke();
-  ctx.strokeStyle='#e49b72';ctx.lineWidth=3.2;
-  ctx.beginPath();ctx.moveTo(startX+4,startY+1);ctx.quadraticCurveTo(startX+12,startY+3,hand.x-1,hand.y);ctx.stroke();
-  ctx.fillStyle='#ffb681';ctx.fillRect(Math.round(hand.x-2),Math.round(hand.y-2),5,3);
-  ctx.fillStyle='#a86450';ctx.fillRect(Math.round(hand.x+2),Math.round(hand.y),2,2);
- }
+ if(!img?.complete||!img.naturalWidth){drawSitting(p.x,p.y,'right',0,1,spec.scale);return;}
+ const frame=Math.floor(time*spec.beatsPerSecond*4)%4;
+ const w=116*spec.scale,h=152*spec.scale;
+ ctx.save();ctx.imageSmoothingEnabled=false;ctx.filter=actorFilter(p.x,p.y);
+ ctx.drawImage(img,frame*128,0,128,170,p.x-w/2,p.y-h,w,h);
  ctx.restore();ctx.imageSmoothingEnabled=true;
 }
 function drawReclining(p){
@@ -504,7 +493,7 @@ function drawReclining(p){
   const faceScale=poseStyles.sofa.lie.headScale;
   const w=74*faceScale,h=58*faceScale;
   ctx.save();ctx.filter=actorFilter(p.x,p.y);ctx.imageSmoothingEnabled=false;
-  ctx.drawImage(img,0,0,80,54,p.x+50-w/2,p.y-52,w,h);
+  ctx.drawImage(img,0,0,80,54,p.x+40-w/2,p.y-52,w,h);
   ctx.restore();ctx.imageSmoothingEnabled=true;
   return;
  }
