@@ -167,39 +167,16 @@ function interact(){
 // Do not paint a second swinging door OVER their already-painted leaves.
 // The balcony slider is a separate, physical opening with no duplicated base leaf.
 function drawBalconyDoor(){
- // Fit the sliding panel inside the EXISTING painted glass track.
- // The old 89×68 threshold graphic projected as a floating opaque box above
- // the sofa; remove it rather than invent a second balcony/background layer.
- const dx=balconyOpening*56;
- ctx.save();
- ctx.globalAlpha=.78;
- ctx.fillStyle='rgba(116,169,172,.16)';
- ctx.fillRect(586+dx,164,55,34);
- ctx.strokeStyle='#c4d6cf';ctx.lineWidth=2.3;
- ctx.strokeRect(586+dx,162,55,37);
- ctx.strokeStyle='rgba(45,71,74,.55)';ctx.lineWidth=1;
- ctx.beginPath();ctx.moveTo(587+dx,191);ctx.lineTo(640+dx,191);ctx.stroke();
- ctx.fillStyle='rgba(240,231,204,.74)';ctx.fillRect(590+dx,179,2,7);
- ctx.restore();
+ // The original artwork already paints the glass track and balcony passage.
+ // A procedural pane previously hovered over the sofa: no duplicate glass.
+ // To animate this correctly we need a dedicated art-aligned transparent layer.
 }
 let bedroomDoorAngle=0,frontDoorMotion=0,bathDoorMotion=0;
 function drawPhysicalDoors(){
- // Doors are TOP-DOWN floor-plan slabs, not upright perspective PNG leaves.
- // The old rotating upright assets appeared to fall across the floor.
- ctx.save();
- const front=ease(frontDoorMotion);
- ctx.translate(719,823);ctx.rotate(-front*.78);
- ctx.fillStyle='#9c6942';ctx.strokeStyle='#36241c';ctx.lineWidth=3;
- ctx.fillRect(0,-6,117,12);ctx.strokeRect(0,-6,117,12);
- ctx.fillStyle='#e4c88b';ctx.fillRect(104,-4,5,3);
- ctx.restore();
- ctx.save();
- const bath=ease(bathDoorMotion);
- ctx.translate(987,739);ctx.rotate(-bath*.95);
- ctx.fillStyle='#a17655';ctx.strokeStyle='#443126';ctx.lineWidth=2.5;
- ctx.fillRect(-5,0,10,78);ctx.strokeRect(-5,0,10,78);
- ctx.fillStyle='#d4b786';ctx.fillRect(-3,62,4,4);
- ctx.restore();
+ // Doors are already painted into every light_*.jpg scene plate.
+ // Never overlay extra vertical sticks or rotated blocks over those leaves.
+ // Actual moving door art will require clean background plates and dedicated
+ // transparent sprites. Keep the original art as the sole rendering source.
 }
 function updateDoors(dt){
  const bedroomNear=Math.hypot(player.x-922,player.y-554)<115;
