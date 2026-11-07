@@ -661,6 +661,14 @@ function tick(ts){const dt=gamePaused?0:clamp((ts-last)/1000||0,0,.041);last=ts;
    if(showerSeconds>=5.2){showerSeconds=-100;stand();showDialogue('shower_done');}
  }
  updateDoors(dt);
+ // The touch control names the selected object. This is especially important
+ // for the closely spaced bathroom mirror, toilet and shower.
+ if(!player.pose&&!player.transition&&dialogue.hidden){
+  const focused=nearest();
+  const label=focused?(focused.id==='balchair'?'BALCONY CHAIR':focused.name.toUpperCase()):'INTERACT';
+  if(actionButton.textContent!==label)actionButton.textContent=label;
+  actionButton.setAttribute('aria-label',focused?'Interact with '+focused.name:'Interact');
+ }else if(actionButton.textContent!=='INTERACT')actionButton.textContent='INTERACT';
  // When near balcony, gently lift camera; leave flat at full original scale.
  const target=player.y<255?clamp((255-player.y)/150,0,1)*184:0;
  cameraY+=(target-cameraY)*Math.min(1,dt*3.2);
