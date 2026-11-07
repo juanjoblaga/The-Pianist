@@ -18,10 +18,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install deterministic image-processing dependencies
+        run: python -m pip install --quiet numpy pillow
       - name: Source and regression tests
         run: |
           set -euo pipefail
           node --check editable/app/src/main/assets/game-assets.js
+          node --check editable/app/src/main/assets/game-poses.js
           node --check editable/app/src/main/assets/game-config.js
           node --check editable/app/src/main/assets/game-physics.js
           node --check editable/app/src/main/assets/game.js
@@ -37,6 +43,7 @@ jobs:
           test -f build-project/app/pianist-prototype-signing.jks
           # Editable resources override the original ZIP, never signing secrets.
           rsync -a editable/app/src/main/ build-project/app/src/main/
+          python3 qa/generate-daylight.py
           # A single manifest sets versionCode/versionName and matching HUD text.
           python3 qa/set-version.py
       - name: Browser simulation of apartment
