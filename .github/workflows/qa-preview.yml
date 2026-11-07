@@ -1,0 +1,82 @@
+name: The Pianist — regression and signed preview
+on:
+  push:
+    branches: [main, 'audit/**', 'feature/**', 'fix/**']
+    paths:
+      - editable/**
+      - qa/*.cjs
+      - .github/workflows/qa-preview.yml
+      - VERSION.json
+  workflow_dispatch:
+concurrency:
+  group: pianist-preview-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Source and regression tests
+        run: |
+          set -euo pipefail
+          node --check editable/app/src/main/assets/game-assets.js
+          node --check editable/app/src/main/assets/game-config.js
+          node --check editable/app/src/main/assets/game-physics.js
+          node --check editable/app/src/main/assets/game.js
+          node --test qa/*.test.cjs
+      - name: Prepare signed Android project from editable files
+        shell: bash
+        run: |
+          set -euo pipefail
+          ZIP=$(python3 -c 'import json;print(json.load(open("VERSION.json"))["baselineZip"])')
+          unzip -tq "$ZIP"
+          mkdir -p build-project
+          unzip -q "$ZIP" -d build-project
+          test -f build-project/app/pianist-prototype-signing.jks
+          # Editable resources override the original ZIP, never signing secrets.
+          rsync -a editable/app/src/main/ build-project/app/src/main/
+          # A single manifest sets versionCode/versionName and matching HUD text.
+          python3 qa/set-version.py
+      - name: Browser simulation of apartment
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --version
+          npm install --no-save playwright-core@1.56.1
+          (cd build-project/app/src/main/assets && python3 -m http.server 8033 --bind 127.0.0.1 > /tmp/pianist-http.log 2>&1) &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
+          node qa/browser-roam.cjs
+      - name: Set up Java
+        if: success()
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Set up Gradle
+        if: success()
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Build APK
+        if: success()
+        working-directory: build-project
+        run: gradle assembleDebug --no-daemon
+      - name: Publish preview and QA screenshots
+        if: success()
+        run: |
+          mkdir -p out
+          cp build-project/app/build/outputs/apk/debug/*.apk "out/ThePianist-v${APP_VERSION}-preview.apk"
+          # Source bundle deliberately excludes signing key and passwords.
+          zip -qr "out/ThePianist-v${APP_VERSION}-editable-source.zip" editable qa VERSION.json README.md AUDIT.md -x 'qa/screenshots/*' '*/.jks' '*/.keystore'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ThePianist-QA-and-preview
+          path: |
+            qa/screenshots/*.png
+            out/*.apk
+            out/*.zip
+          if-no-files-found: warn

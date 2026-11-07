@@ -1,0 +1,347 @@
+[
+  {
+    "path": "QA_NOTES.md",
+    "bytes": 2213,
+    "compressed": 1182
+  },
+  {
+    "path": "README.md",
+    "bytes": 4740,
+    "compressed": 2310
+  },
+  {
+    "path": "app/build.gradle",
+    "bytes": 782,
+    "compressed": 338
+  },
+  {
+    "path": "app/pianist-prototype-signing.jks",
+    "bytes": 3568,
+    "compressed": 3496
+  },
+  {
+    "path": "app/src/main/AndroidManifest.xml",
+    "bytes": 694,
+    "compressed": 361
+  },
+  {
+    "path": "app/src/main/assets/balcony_threshold.png",
+    "bytes": 5098,
+    "compressed": 5103
+  },
+  {
+    "path": "app/src/main/assets/bathdoor_afternoon.png",
+    "bytes": 4715,
+    "compressed": 4720
+  },
+  {
+    "path": "app/src/main/assets/bathdoor_morning.png",
+    "bytes": 4715,
+    "compressed": 4720
+  },
+  {
+    "path": "app/src/main/assets/bathdoor_night.png",
+    "bytes": 4621,
+    "compressed": 4626
+  },
+  {
+    "path": "app/src/main/assets/bathdoor_sunrise.png",
+    "bytes": 4715,
+    "compressed": 4720
+  },
+  {
+    "path": "app/src/main/assets/bathdoor_sunset.png",
+    "bytes": 4715,
+    "compressed": 4720
+  },
+  {
+    "path": "app/src/main/assets/beanbag_approved.png",
+    "bytes": 70768,
+    "compressed": 70439
+  },
+  {
+    "path": "app/src/main/assets/beanbag_clean_v042.png",
+    "bytes": 67419,
+    "compressed": 67116
+  },
+  {
+    "path": "app/src/main/assets/beanbag_indoor.png",
+    "bytes": 67836,
+    "compressed": 67509
+  },
+  {
+    "path": "app/src/main/assets/diagonal_approved.png",
+    "bytes": 189916,
+    "compressed": 189976
+  },
+  {
+    "path": "app/src/main/assets/diagonal_indoor.png",
+    "bytes": 187236,
+    "compressed": 187291
+  },
+  {
+    "path": "app/src/main/assets/diagonal_walk_v040.png",
+    "bytes": 64312,
+    "compressed": 63820
+  },
+  {
+    "path": "app/src/main/assets/diagonal_walk_v042.png",
+    "bytes": 64588,
+    "compressed": 64092
+  },
+  {
+    "path": "app/src/main/assets/diagonal_walk_v043.png",
+    "bytes": 68780,
+    "compressed": 68478
+  },
+  {
+    "path": "app/src/main/assets/diagonal_walk_v045.png",
+    "bytes": 66214,
+    "compressed": 65671
+  },
+  {
+    "path": "app/src/main/assets/duvet_foreground.png",
+    "bytes": 43030,
+    "compressed": 42931
+  },
+  {
+    "path": "app/src/main/assets/frontdoor_afternoon.png",
+    "bytes": 24503,
+    "compressed": 24513
+  },
+  {
+    "path": "app/src/main/assets/frontdoor_morning.png",
+    "bytes": 24603,
+    "compressed": 24613
+  },
+  {
+    "path": "app/src/main/assets/frontdoor_night.png",
+    "bytes": 22610,
+    "compressed": 22620
+  },
+  {
+    "path": "app/src/main/assets/frontdoor_sunrise.png",
+    "bytes": 24519,
+    "compressed": 24529
+  },
+  {
+    "path": "app/src/main/assets/frontdoor_sunset.png",
+    "bytes": 24482,
+    "compressed": 24492
+  },
+  {
+    "path": "app/src/main/assets/game.js",
+    "bytes": 49474,
+    "compressed": 17609
+  },
+  {
+    "path": "app/src/main/assets/idle.png",
+    "bytes": 47745,
+    "compressed": 47758
+  },
+  {
+    "path": "app/src/main/assets/idle_indoor.png",
+    "bytes": 45593,
+    "compressed": 45608
+  },
+  {
+    "path": "app/src/main/assets/index.html",
+    "bytes": 3701,
+    "compressed": 1556
+  },
+  {
+    "path": "app/src/main/assets/light_afternoon.jpg",
+    "bytes": 514296,
+    "compressed": 510241
+  },
+  {
+    "path": "app/src/main/assets/light_morning.jpg",
+    "bytes": 514732,
+    "compressed": 510697
+  },
+  {
+    "path": "app/src/main/assets/light_night.jpg",
+    "bytes": 446491,
+    "compressed": 443816
+  },
+  {
+    "path": "app/src/main/assets/light_sunrise.jpg",
+    "bytes": 514231,
+    "compressed": 510167
+  },
+  {
+    "path": "app/src/main/assets/light_sunset.jpg",
+    "bytes": 518619,
+    "compressed": 514495
+  },
+  {
+    "path": "app/src/main/assets/piano_play_v040.png",
+    "bytes": 17909,
+    "compressed": 17913
+  },
+  {
+    "path": "app/src/main/assets/piano_play_v041.png",
+    "bytes": 18528,
+    "compressed": 17609
+  },
+  {
+    "path": "app/src/main/assets/piano_play_v042.png",
+    "bytes": 19932,
+    "compressed": 19116
+  },
+  {
+    "path": "app/src/main/assets/piano_play_v043.png",
+    "bytes": 21440,
+    "compressed": 20721
+  },
+  {
+    "path": "app/src/main/assets/piano_play_v045.png",
+    "bytes": 21650,
+    "compressed": 20891
+  },
+  {
+    "path": "app/src/main/assets/portrait.png",
+    "bytes": 52381,
+    "compressed": 52401
+  },
+  {
+    "path": "app/src/main/assets/portrait_blissful.png",
+    "bytes": 173149,
+    "compressed": 171495
+  },
+  {
+    "path": "app/src/main/assets/portrait_confident.png",
+    "bytes": 169025,
+    "compressed": 167579
+  },
+  {
+    "path": "app/src/main/assets/portrait_gentle.png",
+    "bytes": 172360,
+    "compressed": 170667
+  },
+  {
+    "path": "app/src/main/assets/portrait_pensive.png",
+    "bytes": 170966,
+    "compressed": 169487
+  },
+  {
+    "path": "app/src/main/assets/portrait_profile.png",
+    "bytes": 163479,
+    "compressed": 162002
+  },
+  {
+    "path": "app/src/main/assets/portrait_serious.png",
+    "bytes": 168320,
+    "compressed": 167031
+  },
+  {
+    "path": "app/src/main/assets/portrait_surprised.png",
+    "bytes": 168718,
+    "compressed": 166934
+  },
+  {
+    "path": "app/src/main/assets/portrait_thoughtful.png",
+    "bytes": 180305,
+    "compressed": 178565
+  },
+  {
+    "path": "app/src/main/assets/sitting_approved.png",
+    "bytes": 73195,
+    "compressed": 73118
+  },
+  {
+    "path": "app/src/main/assets/sitting_indoor.png",
+    "bytes": 71057,
+    "compressed": 70947
+  },
+  {
+    "path": "app/src/main/assets/style.css",
+    "bytes": 6347,
+    "compressed": 2049
+  },
+  {
+    "path": "app/src/main/assets/walk.png",
+    "bytes": 304207,
+    "compressed": 304204
+  },
+  {
+    "path": "app/src/main/assets/walk_cycle_v045.png",
+    "bytes": 140100,
+    "compressed": 139556
+  },
+  {
+    "path": "app/src/main/assets/walk_indoor.png",
+    "bytes": 291629,
+    "compressed": 291608
+  },
+  {
+    "path": "app/src/main/assets/world_afternoon.jpg",
+    "bytes": 896619,
+    "compressed": 885925
+  },
+  {
+    "path": "app/src/main/assets/world_morning.jpg",
+    "bytes": 903824,
+    "compressed": 892949
+  },
+  {
+    "path": "app/src/main/assets/world_night.jpg",
+    "bytes": 720041,
+    "compressed": 709696
+  },
+  {
+    "path": "app/src/main/assets/world_sunrise.jpg",
+    "bytes": 869211,
+    "compressed": 858343
+  },
+  {
+    "path": "app/src/main/assets/world_sunset.jpg",
+    "bytes": 861351,
+    "compressed": 850375
+  },
+  {
+    "path": "app/src/main/java/com/thepianist/game/MainActivity.java",
+    "bytes": 5120,
+    "compressed": 1638
+  },
+  {
+    "path": "app/src/main/res/mipmap-hdpi/ic_launcher.png",
+    "bytes": 10835,
+    "compressed": 10840
+  },
+  {
+    "path": "app/src/main/res/mipmap-mdpi/ic_launcher.png",
+    "bytes": 5238,
+    "compressed": 5243
+  },
+  {
+    "path": "app/src/main/res/mipmap-xhdpi/ic_launcher.png",
+    "bytes": 17947,
+    "compressed": 17957
+  },
+  {
+    "path": "app/src/main/res/mipmap-xxhdpi/ic_launcher.png",
+    "bytes": 36783,
+    "compressed": 36798
+  },
+  {
+    "path": "app/src/main/res/mipmap-xxxhdpi/ic_launcher.png",
+    "bytes": 60739,
+    "compressed": 60759
+  },
+  {
+    "path": "build.gradle",
+    "bytes": 73,
+    "compressed": 70
+  },
+  {
+    "path": "gradle.properties",
+    "bytes": 76,
+    "compressed": 72
+  },
+  {
+    "path": "settings.gradle",
+    "bytes": 271,
+    "compressed": 168
+  }
+]
