@@ -26,6 +26,7 @@ jobs:
       - name: Source and regression tests
         run: |
           set -euo pipefail
+          python3 qa/generate-piano-frames.py
           node --check editable/app/src/main/assets/game-assets.js
           node --check editable/app/src/main/assets/game-poses.js
           node --check editable/app/src/main/assets/game-config.js

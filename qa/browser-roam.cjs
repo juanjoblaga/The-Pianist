@@ -93,6 +93,14 @@ const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
     await pause(820);
     const seated=await page.evaluate(()=>window.__pianistTest.getState());
     assert(seated.pose&&seated.pose.id===id,'Pose failed: '+id);
+    if(id==='piano'){
+      const getKeys=()=>page.evaluate(()=>Array.from(document.querySelector('#game').getContext('2d').getImageData(779,338,27,33).data));
+      const a=await getKeys();
+      await pause(265);
+      const b=await getKeys();
+      const changed=a.reduce((n,v,i)=>n+(Math.abs(v-b[i])>16?1:0),0);
+      assert(changed>=18,'The pianist must visibly articulate his hands, not simply bob his torso: '+changed);
+    }
     await page.screenshot({path:imageDir+'/'+shot});
     await page.evaluate(()=>window.__pianistTest.interact());await pause(820);
     const exited=await page.evaluate(()=>window.__pianistTest.getState());

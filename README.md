@@ -1,3 +1,12 @@
+## v0.5.2 — proportionate poses and reproducible piano animation
+
+- **Bed lying:** the face is now sampled from the same original 80×54 sprite proportionally (84×57 rendered), fixing the stretched/narrow head of v0.5.1.
+- **Sofa lying:** clothes/legs and upright head are composed separately from the approved sprite, instead of rotating the face and eyes sideways. The head overlaps the torso rather than floating beside it.
+- **Piano stool:** seated anchor (746,407) sits on the painted bench. The two hands reach the keyboard using four small bent-arm key-press poses; the exaggerated elongated-arm atlas and temporary fake wrist lines are not used.
+- **Asset authoring:** `qa/generate-piano-frames.py` uses the right-facing approved `sitting_indoor.png` frame to make `piano_motion_v052.png` reproducibly before all tests and the APK build. Change the four elbow/wrist poses there rather than modifying unrelated motion code. The original sitting sprites and user-approved face remain unmodified.
+- **Doors:** duplicate procedural overlays were removed. The large open panels remain baked into the approved original scene plates and need separate art-layer reconstruction. Don't mark the doors finished.
+- **QA:** automated checks now enforce proportional bed head, keyboard and bench alignment, independent four-frame piano articulation, and run through a real screenshot-based bedroom, sofa and piano scene. Physical-device and visual acceptance remain necessary.
+
 ## v0.5.1 visual/interaction review (draft)
 
 The app's user feedback identified defects that automated pass/fail scripts did not catch. This branch includes a reusable pose map (`game-poses.js`), natural floor-return transitions, a sofa reclining action, revised bed-head placement/sheet covering, safer shower staging, direction-aware bathroom targets with explicit action-button labels, and deterministically graded *exterior* daylight paintings.

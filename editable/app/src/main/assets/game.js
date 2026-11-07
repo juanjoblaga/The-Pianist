@@ -167,39 +167,16 @@ function interact(){
 // Do not paint a second swinging door OVER their already-painted leaves.
 // The balcony slider is a separate, physical opening with no duplicated base leaf.
 function drawBalconyDoor(){
- // Fit the sliding panel inside the EXISTING painted glass track.
- // The old 89×68 threshold graphic projected as a floating opaque box above
- // the sofa; remove it rather than invent a second balcony/background layer.
- const dx=balconyOpening*56;
- ctx.save();
- ctx.globalAlpha=.78;
- ctx.fillStyle='rgba(116,169,172,.16)';
- ctx.fillRect(586+dx,164,55,34);
- ctx.strokeStyle='#c4d6cf';ctx.lineWidth=2.3;
- ctx.strokeRect(586+dx,162,55,37);
- ctx.strokeStyle='rgba(45,71,74,.55)';ctx.lineWidth=1;
- ctx.beginPath();ctx.moveTo(587+dx,191);ctx.lineTo(640+dx,191);ctx.stroke();
- ctx.fillStyle='rgba(240,231,204,.74)';ctx.fillRect(590+dx,179,2,7);
- ctx.restore();
+ // The original artwork already paints the glass track and balcony passage.
+ // A procedural pane previously hovered over the sofa: no duplicate glass.
+ // To animate this correctly we need a dedicated art-aligned transparent layer.
 }
 let bedroomDoorAngle=0,frontDoorMotion=0,bathDoorMotion=0;
 function drawPhysicalDoors(){
- // Doors are TOP-DOWN floor-plan slabs, not upright perspective PNG leaves.
- // The old rotating upright assets appeared to fall across the floor.
- ctx.save();
- const front=ease(frontDoorMotion);
- ctx.translate(719,823);ctx.rotate(-front*.78);
- ctx.fillStyle='#9c6942';ctx.strokeStyle='#36241c';ctx.lineWidth=3;
- ctx.fillRect(0,-6,117,12);ctx.strokeRect(0,-6,117,12);
- ctx.fillStyle='#e4c88b';ctx.fillRect(104,-4,5,3);
- ctx.restore();
- ctx.save();
- const bath=ease(bathDoorMotion);
- ctx.translate(987,739);ctx.rotate(-bath*.95);
- ctx.fillStyle='#a17655';ctx.strokeStyle='#443126';ctx.lineWidth=2.5;
- ctx.fillRect(-5,0,10,78);ctx.strokeRect(-5,0,10,78);
- ctx.fillStyle='#d4b786';ctx.fillRect(-3,62,4,4);
- ctx.restore();
+ // Doors are already painted into every light_*.jpg scene plate.
+ // Never overlay extra vertical sticks or rotated blocks over those leaves.
+ // Actual moving door art will require clean background plates and dedicated
+ // transparent sprites. Keep the original art as the sole rendering source.
 }
 function updateDoors(dt){
  const bedroomNear=Math.hypot(player.x-922,player.y-554)<115;
@@ -486,38 +463,50 @@ function drawSitting(x,y,face,phase,opacity=1,scale=1,beanbag=false){
  ctx.restore();ctx.imageSmoothingEnabled=true;
 }
 function drawPianoPlaying(p){
- // The separate four-frame atlas had elongated, disconnected arms.
- // Reuse the anatomically approved right-facing seated frame, with a tiny
- // body weight shift only. No synthetic elbows or sound are invented.
- ctx.save();ctx.translate(0,Math.sin(time*2.7)*.7);
- drawSitting(p.x,p.y,p.face,0,1,poseStyles.piano.sit.scale);
- ctx.restore();
+ // Reusable authored pixel-art atlas: the approved seated body with four
+ // independently moving finger/forearm poses, built from generate-piano-frames.
+ // No extra arms drawn onto a static pose and no elongated-arm image hacks.
+ const img=files[spriteFile.pianoMotion];
+ const spec=poseStyles.piano.sit;
+ if(!img?.complete||!img.naturalWidth){drawSitting(p.x,p.y,'right',0,1,spec.scale);return;}
+ const frame=Math.floor(time*spec.beatsPerSecond*4)%4;
+ const w=116*spec.scale,h=152*spec.scale;
+ ctx.save();ctx.imageSmoothingEnabled=false;ctx.filter=actorFilter(p.x,p.y);
+ ctx.drawImage(img,frame*128,0,128,170,p.x-w/2,p.y-h,w,h);
+ ctx.restore();ctx.imageSmoothingEnabled=true;
 }
 function drawReclining(p){
  const img=files[spriteFile.idle];
  if(!img?.complete||!img.naturalWidth)return;
  if(p.id==='sofa'){
-  // Full approved body rotated onto the long sofa cushion.
-  // Head rests by the cushion on the right; legs remain on the sofa.
+  // A standing profile rotated whole makes the face sideways. Instead the
+  // approved clothed body rests horizontally, while a front-facing head looks
+  // upward from the cushion. Both use the exact original character artwork.
+  const scale=poseStyles.sofa.lie.bodyScale;
   ctx.save();ctx.filter=actorFilter(p.x,p.y);ctx.imageSmoothingEnabled=false;
-  ctx.translate(p.x,p.y);ctx.rotate(Math.PI/2);
-  ctx.drawImage(img,80,0,80,112,-38,-79,76,158);
+  ctx.translate(p.x+18,p.y);
+  ctx.rotate(Math.PI/2);
+  // Side-view torso and legs only: source crop starts below the chin.
+  ctx.drawImage(img,80,61,80,51,-35*scale,-6*scale,70*scale,91*scale);
+  ctx.restore();
+  // Original front-facing face; no sideways eyes or reduced head width.
+  const faceScale=poseStyles.sofa.lie.headScale;
+  const w=74*faceScale,h=58*faceScale;
+  ctx.save();ctx.filter=actorFilter(p.x,p.y);ctx.imageSmoothingEnabled=false;
+  ctx.drawImage(img,0,0,80,54,p.x+40-w/2,p.y-52,w,h);
   ctx.restore();ctx.imageSmoothingEnabled=true;
   return;
  }
  if(p.id==='bed'){
-  // The pillow holds only the head. The painted linen covers the shoulders,
-  // torso and legs: no upright, square-cut torso floating in the white sheet.
-  // Only the naturally shaped hair/face remains over the pillow. The rest
-  // is already under the intact white sheet in the original base painting.
-  // No cropped black torso and no artificial white rectangular overlay.
+  // Maintain the actual sprite's head proportions. Previously 80×54 was
+  // stretched to 72×61, producing a tall, unnaturally narrow face.
+  const spec=poseStyles.bed.lie;
+  const w=spec.headWidth,h=spec.headHeight;
   ctx.save();ctx.filter=actorFilter(p.x,p.y);ctx.imageSmoothingEnabled=false;
-  ctx.fillStyle='#bb815f';ctx.fillRect(p.x-5,p.y-10,10,11);
-  ctx.drawImage(img,0,0,80,54,p.x-36,p.y-63,72,61);
+  ctx.drawImage(img,0,0,80,54,p.x-w/2,p.y-h-6,w,h);
   ctx.restore();ctx.imageSmoothingEnabled=true;
  }
 }
-
 function drawShower(p){
  // No unclothed character artwork: a discreet opaque mosaic and small water ripples
  // occupy the shower cubicle while the player is hidden behind the privacy glass.
