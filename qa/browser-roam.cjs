@@ -58,15 +58,27 @@ const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
   let standing=await page.evaluate(()=>window.__pianistTest.getState());
   assert.equal(standing.pose,null,'Cannot stand after lying down');
   assert(await page.evaluate(()=>window.__pianistTest.passable(window.__pianistTest.getState().x,window.__pianistTest.getState().y)),'Bed exit is blocked');
-  // Sofa sitting: no unapproved reclining option, and no visual crash.
+  // Sofa sitting must return to exact starting floor position, not through the table.
   await page.evaluate(()=>window.__pianistTest.setPlayer(605,354,'left'));
   await page.evaluate(()=>window.__pianistTest.interact());
-  assert.equal(await page.getByRole('button',{name:'Lie down'}).count(),0,'Sofa reclining must remain disabled');
+  assert.equal(await page.getByRole('button',{name:'Lie down'}).count(),1,'Sofa must support lying down');
   await page.getByRole('button',{name:'Sit',exact:true}).dispatchEvent('pointerdown',{bubbles:true});
   await pause(850);
   assert.equal((await page.evaluate(()=>window.__pianistTest.getState().pose)).id,'sofa');
   await page.screenshot({path:imageDir+'/03-sofa-seated.png'});
   await page.evaluate(()=>window.__pianistTest.interact());await pause(850);
+  const sofaExit=await page.evaluate(()=>window.__pianistTest.getState());
+  assert(Math.hypot(sofaExit.x-605,sofaExit.y-354)<2,'Sofa exit should return to original approach');
+  await page.evaluate(()=>window.__pianistTest.setPlayer(605,354,'left'));
+  await page.evaluate(()=>window.__pianistTest.interact());
+  await page.getByRole('button',{name:'Lie down'}).dispatchEvent('pointerdown',{bubbles:true});
+  await pause(850);
+  const sofaLie=await page.evaluate(()=>window.__pianistTest.getState());
+  assert(sofaLie.pose?.id==='sofa'&&sofaLie.pose.type==='lie','Sofa lying pose missing');
+  await page.screenshot({path:imageDir+'/10-sofa-lying.png'});
+  await page.evaluate(()=>window.__pianistTest.interact());await pause(850);
+  const sofaLieExit=await page.evaluate(()=>window.__pianistTest.getState());
+  assert(Math.hypot(sofaLieExit.x-605,sofaLieExit.y-354)<2,'Sofa lie exit must return to the approach');
   // Additional pose tour: inspect actual piano hands, bed seating and beanbag/chair.
   const poseCases=[
     ['piano',730,420,'right','Play','06-piano-playing.png'],
@@ -99,6 +111,30 @@ const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
   assert.equal(shower.pose,null,'Shower pose failed to clear');
   await pause(850);
   assert(await page.evaluate(()=>window.__pianistTest.passable(window.__pianistTest.getState().x,window.__pianistTest.getState().y)),'Stuck after shower');
+  const showerExit=await page.evaluate(()=>window.__pianistTest.getState());
+  assert(Math.hypot(showerExit.x-1060,showerExit.y-720)<2,'Shower exit must be at clear bathroom floor');
+  await page.evaluate(()=>{document.querySelector('#dialogue').hidden=true;});
+  await page.keyboard.down('ArrowLeft');await pause(160);await page.keyboard.up('ArrowLeft');
+  const movedOut=await page.evaluate(()=>window.__pianistTest.getState());
+  assert(movedOut.x<showerExit.x-5,'Avatar cannot move away after shower');
+  const fixtures=[['mirror',1178,695,'up'],['toilet',1207,603,'down'],['shower',1250,590,'right']];
+  for(const [id,x,y,dir] of fixtures){
+   const target=await page.evaluate(({x,y,dir})=>{window.__pianistTest.setPlayer(x,y,dir);return window.__pianistTest.nearestId()},{x,y,dir});
+   assert.equal(target,id,'Wrong restroom target '+id);
+  }
+  // Daylight must visibly differ from the previously baked-in night scene.
+  await page.evaluate(()=>window.__pianistTest.setPlayer(730,570,'down'));
+  await page.evaluate(()=>window.__pianistTest.setLighting('night'));
+  await page.waitForFunction(()=>window.__pianistTest.getState().lightMode==='night');
+  await pause(2400);
+  await page.screenshot({path:imageDir+'/11-night-exterior.png'});
+  const nightPixel=await page.evaluate(()=>Array.from(document.querySelector('#game').getContext('2d').getImageData(1100,56,1,1).data));
+  await page.evaluate(()=>window.__pianistTest.setLighting('afternoon'));
+  await page.waitForFunction(()=>window.__pianistTest.getState().lightMode==='afternoon');
+  await pause(2400);
+  await page.screenshot({path:imageDir+'/12-daytime-exterior.png'});
+  const dayPixel=await page.evaluate(()=>Array.from(document.querySelector('#game').getContext('2d').getImageData(1100,56,1,1).data));
+  assert(dayPixel.slice(0,3).reduce((v,x,i)=>v+Math.abs(x-nightPixel[i]),0)>18,'Daylight should be visibly different from night');
   // Lighting and weather can be switched without loading/rendering errors.
   await page.evaluate(()=>window.__pianistTest.setPlayer(730,570,'down'));
   for(const mode of ['sunrise','morning','afternoon','sunset','night']){
