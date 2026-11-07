@@ -1,11 +1,12 @@
 name: The Pianist — regression and signed preview
 on:
   push:
-    branches: [audit/gameplay-engine-refactor-v0-5]
+    branches: [main, 'audit/**', 'feature/**', 'fix/**']
     paths:
       - editable/**
       - qa/*.cjs
       - .github/workflows/qa-preview.yml
+      - VERSION.json
   workflow_dispatch:
 concurrency:
   group: pianist-preview-${{ github.ref }}
@@ -29,16 +30,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ZIP=ThePianistAndroid-GitHubBuild-v0.4.5.zip
+          ZIP=$(python3 -c 'import json;print(json.load(open("VERSION.json"))["baselineZip"])')
           unzip -tq "$ZIP"
           mkdir -p build-project
           unzip -q "$ZIP" -d build-project
           test -f build-project/app/pianist-prototype-signing.jks
           # Editable resources override the original ZIP, never signing secrets.
           rsync -a editable/app/src/main/ build-project/app/src/main/
-          # Version bump must be monotonic; stable signing and applicationId remain.
-          sed -i -e "s/versionCode 18/versionCode 19/" -e "s/versionName '0.4.5'/versionName '0.5.0'/" build-project/app/build.gradle
-          grep -E "versionCode|versionName|applicationId" build-project/app/build.gradle
+          # A single manifest sets versionCode/versionName and matching HUD text.
+          python3 qa/set-version.py
       - name: Browser simulation of apartment
         shell: bash
         run: |
@@ -68,13 +68,13 @@ jobs:
         if: success()
         run: |
           mkdir -p out
-          cp build-project/app/build/outputs/apk/debug/*.apk out/ThePianist-v0.5.0-preview.apk
+          cp build-project/app/build/outputs/apk/debug/*.apk "out/ThePianist-v${APP_VERSION}-preview.apk"
           # Source bundle deliberately excludes signing key and passwords.
-          zip -qr out/ThePianist-v0.5.0-editable-source.zip editable qa -x 'qa/screenshots/*' '*/.jks' '*/.keystore'
+          zip -qr "out/ThePianist-v${APP_VERSION}-editable-source.zip" editable qa VERSION.json README.md AUDIT.md -x 'qa/screenshots/*' '*/.jks' '*/.keystore'
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: ThePianist-v0.5.0-QA-and-preview
+          name: ThePianist-QA-and-preview
           path: |
             qa/screenshots/*.png
             out/*.apk
