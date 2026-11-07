@@ -506,12 +506,20 @@ function drawReclining(p){
   return;
  }
  if(p.id==='bed'){
-  // Head and a little of the shoulders sit ON the pillows at their top edge,
-  // not in the middle of the duvet. The torso remains beneath the existing
-  // painted sheet/cover: no duplicate duvet slab is added.
+  // The pillow holds only the head. The painted linen covers the shoulders,
+  // torso and legs: no upright, square-cut torso floating in the white sheet.
   ctx.save();ctx.filter=actorFilter(p.x,p.y);ctx.imageSmoothingEnabled=false;
-  ctx.drawImage(img,0,0,80,76,p.x-37,p.y-71,74,72);
+  ctx.drawImage(img,0,0,80,65,p.x-37,p.y-66,74,72);
   ctx.restore();ctx.imageSmoothingEnabled=true;
+  // Reuse the *same* day's approved white sheet texture from the base plate.
+  // Drawing that section higher forms a soft fold just below the character's
+  // neck without a second patterned duvet or unapproved naked-body sprite.
+  const sheet=files['light_'+lightMode];
+  if(sheet?.complete&&sheet.naturalWidth){
+   ctx.save();ctx.globalAlpha=.96;
+   ctx.drawImage(sheet,1007,349,197,61,1007,314,197,91);
+   ctx.restore();
+  }
  }
 }
 
