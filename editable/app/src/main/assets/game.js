@@ -108,7 +108,7 @@ function changePose(id,type){
  const data=furniture[id]?.[type];if(!data)return;
  // Preserve the exact approach where the player could actually stand.
  // The shower has a dedicated clear exit by the bathroom door, not on a wall.
- const exit=id==='shower'?safeExit({x:1060,y:720}):
+ const exit=id==='shower'?safeExit({x:1028,y:719}):
    (passable(player.x,player.y)?{x:player.x,y:player.y}:safeExit(data.exit));
  player.transition={kind:'enter',id,type,t:0,fromX:player.x,fromY:player.y,
    toX:data.x,toY:data.y,exit,face:data.face,exitDir:player.dir};
@@ -476,30 +476,24 @@ function drawPianoPlaying(p){
  ctx.restore();ctx.imageSmoothingEnabled=true;
 }
 function drawReclining(p){
- const img=files[spriteFile.idle];
- if(!img?.complete||!img.naturalWidth)return;
  if(p.id==='sofa'){
-  // A standing profile rotated whole makes the face sideways. Instead the
-  // approved clothed body rests horizontally, while a front-facing head looks
-  // upward from the cushion. Both use the exact original character artwork.
-  const scale=poseStyles.sofa.lie.bodyScale;
+  // Approved ceiling-facing three-frame resting pose from v0.4.6, now scaled
+  // for the sofa cushion instead of filling the entire couch.
+  // Pillow is part of the real sprite; no head cut/pasted from walking frames.
+  const img=files[spriteFile.sofaRest];
+  if(!img?.complete||!img.naturalWidth)return;
+  const frame=[0,1,2,1][Math.floor(time*1.35)%4];
+  const spec=poseStyles.sofa.lie;
   ctx.save();ctx.filter=actorFilter(p.x,p.y);ctx.imageSmoothingEnabled=false;
-  ctx.translate(p.x+18,p.y);
-  ctx.rotate(Math.PI/2);
-  // Side-view torso and legs only: source crop starts below the chin.
-  ctx.drawImage(img,80,61,80,51,-35*scale,-6*scale,70*scale,91*scale);
-  ctx.restore();
-  // Original front-facing face; no sideways eyes or reduced head width.
-  const faceScale=poseStyles.sofa.lie.headScale;
-  const w=74*faceScale,h=58*faceScale;
-  ctx.save();ctx.filter=actorFilter(p.x,p.y);ctx.imageSmoothingEnabled=false;
-  ctx.drawImage(img,0,0,80,54,p.x+40-w/2,p.y-52,w,h);
+  ctx.drawImage(img,frame*240,0,240,96,p.x-spec.width/2,p.y-spec.height+6,spec.width,spec.height);
   ctx.restore();ctx.imageSmoothingEnabled=true;
   return;
  }
  if(p.id==='bed'){
-  // Maintain the actual sprite's head proportions. Previously 80×54 was
-  // stretched to 72×61, producing a tall, unnaturally narrow face.
+  // The previously approved bed pose stays: head at the real bed pillows;
+  // the body remains covered by the existing painted bedding (no false duvet).
+  const img=files[spriteFile.idle];
+  if(!img?.complete||!img.naturalWidth)return;
   const spec=poseStyles.bed.lie;
   const w=spec.headWidth,h=spec.headHeight;
   ctx.save();ctx.filter=actorFilter(p.x,p.y);ctx.imageSmoothingEnabled=false;

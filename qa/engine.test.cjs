@@ -20,6 +20,8 @@ test('canonical dialogue and interactions',()=>{
 test('walls and narrow furniture clearances',()=>{
  assert(physics.passable(730,570));
  assert(physics.passable(480,319),'Sofa-table gap should be passable');
+ for(let x=388;x<=625;x+=4)assert(physics.passable(x,325),'Horizontal sofa-table walk route blocked at '+x);
+ for(let y=309;y<=335;y+=4)assert(physics.passable(420,y),'Sofa-chaise/table turn blocked at '+y);
  assert(physics.passable(1018,700));
  for(const [x,y] of [[100,100],[895,400],[895,420],[1080,340],[1325,650],[465,360],[260,300]])assert(!physics.passable(x,y),'Wrong collider '+x+','+y);
 });
@@ -33,7 +35,7 @@ test('furniture poses have valid safe exits',()=>{
   }
  }
  assert(config.furniture.sofa.lie,'Sofa should offer a lying pose');
- assert.equal(physics.passable(1060,720),true,'Shower needs a genuinely walkable exit');
+ assert.equal(physics.passable(1028,719),true,'Shower needs a genuinely walkable exit');
 });
 test('all 13 objects are reachable on 8-way movement grid',()=>{
  const delta=[[8,0],[-8,0],[0,8],[0,-8],[8,8],[-8,8],[8,-8],[-8,-8]];
@@ -52,6 +54,7 @@ test('all 13 objects are reachable on 8-way movement grid',()=>{
 });
 test('bed lie uses approved available sprite, and QA hook is opt-in',()=>{
  assert(game.includes('const img=files[spriteFile.idle];'));
+ assert(game.includes('files[spriteFile.sofaRest]'),'Approved sofa resting artwork must be loaded');
  assert(visuals.sofa.lie&&visuals.bed.lie,'Both lying poses must be rendered');
  for(const [id,types] of Object.entries(config.furniture))for(const type of Object.keys(types))assert(visuals[id]?.[type],id+' / '+type+' missing visual');
  assert(game.includes("URLSearchParams(location.search).has('qa')"));
@@ -69,7 +72,7 @@ test('poses and release rendering avoid old unnatural assets',()=>{
  assert.equal(config.furniture.bed.lie.y,289);
  assert.equal(visuals.sofa.sit.scale,visuals.bed.sit.scale,'seating proportions should remain consistent');
  assert(visuals.balchair.sit.scale>=.85&&visuals.beanbag.sit.scale>=.85);
- assert(game.includes('const exit=id===\'shower\'?safeExit({x:1060,y:720})'),'shower must exit clear of walls');
+ assert(game.includes('const exit=id===\'shower\'?safeExit({x:1028,y:719})'),'shower must exit clear of walls');
  assert(!game.includes("const img=files[spriteFile.piano]"),'Do not restore distorted piano arm atlas');
  assert(!game.includes("ctx.drawImage(img,994,338,222,130)"),'No duplicate duvet over torso');
 });
@@ -78,8 +81,9 @@ test('head proportions, sofa lying pose and piano bench alignment',()=>{
  const bed=visuals.bed.lie;
  assert(Math.abs(bed.headWidth/80-bed.headHeight/54)<.025,
   'Bed must scale the original face uniformly, never narrower than standing');
- assert(game.includes("ctx.drawImage(img,0,0,80,54,p.x+40-w/2"),
-  'Sofa should have an upright approved head at the body-end cushion');
+ assert(game.includes('files[spriteFile.sofaRest]'),
+  'Sofa must show the approved natural reclining sprite, not a spliced upright head');
+ assert(visuals.sofa.lie.width<=180, 'Sofa pose must be scaled to furniture proportions');
  assert(!game.includes("ctx.drawImage(img,80,0,80,112,-38,-79"),
   'Do not rotate an entire upright character sideways for sofa lying');
  const p=config.furniture.piano.sit;
