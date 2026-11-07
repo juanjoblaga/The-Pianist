@@ -71,7 +71,7 @@ const furniture={
  // Furniture anchors are virtual canvas pixels, not walking destinations.
  // Each seat returns the player to their actual pre-interaction floor position.
  sofa:{sit:{x:450,y:307,face:'down',exit:{x:465,y:426}},lie:{x:451,y:286,face:'right',exit:{x:465,y:426}}},
- bed:{sit:{x:1103,y:502,face:'down',exit:{x:1103,y:526}},lie:{x:1104,y:323,face:'up',exit:{x:1103,y:526}}},
+ bed:{sit:{x:1103,y:502,face:'down',exit:{x:1103,y:526}},lie:{x:1104,y:289,face:'up',exit:{x:1103,y:526}}},
  balchair:{sit:{x:470,y:149,face:'left',exit:{x:527,y:144}}},
  beanbag:{sit:{x:759,y:149,face:'down',exit:{x:681,y:144}}},
  piano:{sit:{x:758,y:423,face:'right',exit:{x:699,y:420}}},
