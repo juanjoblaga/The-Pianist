@@ -66,7 +66,7 @@ test('nearby bathroom fixtures resolve by facing, not raw proximity',()=>{
  assert.notEqual(physics.nearest(1250,590,'left')?.id,'shower');
 });
 test('poses and release rendering avoid old unnatural assets',()=>{
- assert.equal(config.furniture.bed.lie.y,323);
+ assert.equal(config.furniture.bed.lie.y,289);
  assert.equal(visuals.sofa.sit.scale,visuals.bed.sit.scale,'seating proportions should remain consistent');
  assert(visuals.balchair.sit.scale>=.85&&visuals.beanbag.sit.scale>=.85);
  assert(game.includes('const exit=id===\'shower\'?safeExit({x:1060,y:720})'),'shower must exit clear of walls');
