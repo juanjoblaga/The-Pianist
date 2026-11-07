@@ -508,17 +508,13 @@ function drawReclining(p){
  if(p.id==='bed'){
   // The pillow holds only the head. The painted linen covers the shoulders,
   // torso and legs: no upright, square-cut torso floating in the white sheet.
+  // Only the naturally shaped hair/face remains over the pillow. The rest
+  // is already under the intact white sheet in the original base painting.
+  // No cropped black torso and no artificial white rectangular overlay.
   ctx.save();ctx.filter=actorFilter(p.x,p.y);ctx.imageSmoothingEnabled=false;
-  ctx.drawImage(img,0,0,80,62,p.x-35,p.y-65,70,68);
+  ctx.fillStyle='#bb815f';ctx.fillRect(p.x-5,p.y-10,10,11);
+  ctx.drawImage(img,0,0,80,54,p.x-36,p.y-63,72,61);
   ctx.restore();ctx.imageSmoothingEnabled=true;
-  // A small feathered linen edge hides the shirt/torso. Do not paste a broad
-  // rectangular section over the bed: that looked like a mismatched blanket.
-  ctx.save();
-  const fade=ctx.createLinearGradient(0,p.y-13,0,p.y+11);
-  fade.addColorStop(0,'rgba(208,211,219,0)');
-  fade.addColorStop(1,'rgba(208,211,219,.95)');
-  ctx.fillStyle=fade;ctx.fillRect(p.x-37,p.y-13,74,24);
-  ctx.restore();
  }
 }
 
