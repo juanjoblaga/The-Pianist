@@ -1,5 +1,5 @@
 (()=>{'use strict';
-// The Pianist v0.5.0 — approved dialogue, portraits, shower, mirror, elevated city environment.
+// The Pianist v0.5.4 — approved dialogue, portraits, shower, mirror, elevated city environment.
 const W=1536,H=899,canvas=document.querySelector('#game'),ctx=canvas.getContext('2d',{alpha:false});
 canvas.width=W;canvas.height=H;ctx.imageSmoothingEnabled=true;
 // Keep only one fully decoded time-of-day scene in memory. A second scene is
@@ -103,12 +103,28 @@ dialogue.addEventListener('pointerdown',e=>{
 // Feet anchored to floor; narrow enough to approach walls, never walk on walls.
 const physics=window.ThePianistPhysics.create(window.ThePianistConfig,9);
 const passable=physics.passable;
-const nearest=()=>physics.nearest(player.x,player.y,player.dir);
+function nearest(){
+ const direct=physics.nearest(player.x,player.y,player.dir);
+ if(direct)return direct;
+ const sofa=objects.find(o=>o.id==='sofa');
+ if(sofa){
+  // Accept interaction from all usable edges of the sectional, not just the long end.
+  const halo=[sofa.rect[0]-28,sofa.rect[1]-20,sofa.rect[2]+24,sofa.rect[3]+24];
+  const [dist,dx,dy]=physics.distanceToRect(player.x,player.y,halo);
+  if(dist<=92){
+   const aimDist=Math.hypot(dx,dy)||1;
+   const [fx,fy]=(window.ThePianistPhysics.vectors[player.dir]||window.ThePianistPhysics.vectors.down);
+   const dot=(dx*fx+dy*fy)/aimDist;
+   if(dot>=-.12)return sofa;
+  }
+ }
+ return null;
+}
 function changePose(id,type){
  const data=furniture[id]?.[type];if(!data)return;
  // Preserve the exact approach where the player could actually stand.
  // The shower has a dedicated clear exit by the bathroom door, not on a wall.
- const exit=id==='shower'?safeExit({x:1028,y:719}):
+ const exit=id==='shower'?safeExit({x:1062,y:718}):
    (passable(player.x,player.y)?{x:player.x,y:player.y}:safeExit(data.exit));
  player.transition={kind:'enter',id,type,t:0,fromX:player.x,fromY:player.y,
    toX:data.x,toY:data.y,exit,face:data.face,exitDir:player.dir};
@@ -463,13 +479,12 @@ function drawSitting(x,y,face,phase,opacity=1,scale=1,beanbag=false){
  ctx.restore();ctx.imageSmoothingEnabled=true;
 }
 function drawPianoPlaying(p){
- // Reusable authored pixel-art atlas: the approved seated body with four
- // independently moving finger/forearm poses, built from generate-piano-frames.
- // No extra arms drawn onto a static pose and no elongated-arm image hacks.
+ // Exact six-frame approved seated-and-playing animation, with the body
+ // positioned toward the middle of the keyboard and centered over the stool.
  const img=files[spriteFile.pianoMotion];
  const spec=poseStyles.piano.sit;
  if(!img?.complete||!img.naturalWidth){drawSitting(p.x,p.y,'right',0,1,spec.scale);return;}
- const frame=Math.floor(time*spec.beatsPerSecond*4)%4;
+ const frame=Math.floor(time*spec.beatsPerSecond*6)%6;
  const w=116*spec.scale,h=152*spec.scale;
  ctx.save();ctx.imageSmoothingEnabled=false;ctx.filter=actorFilter(p.x,p.y);
  ctx.drawImage(img,frame*128,0,128,170,p.x-w/2,p.y-h,w,h);
@@ -490,14 +505,23 @@ function drawReclining(p){
   return;
  }
  if(p.id==='bed'){
-  // The previously approved bed pose stays: head at the real bed pillows;
-  // the body remains covered by the existing painted bedding (no false duvet).
+  // Keep the head at the pillows and tuck the painted plain linen sheet up
+  // to the neck; do not paste a second patterned blanket over the original.
   const img=files[spriteFile.idle];
   if(!img?.complete||!img.naturalWidth)return;
   const spec=poseStyles.bed.lie;
   const w=spec.headWidth,h=spec.headHeight;
   ctx.save();ctx.filter=actorFilter(p.x,p.y);ctx.imageSmoothingEnabled=false;
-  ctx.drawImage(img,0,0,80,54,p.x-w/2,p.y-h-6,w,h);
+  ctx.drawImage(img,0,0,80,54,p.x-w/2,p.y-h-7,w,h);
+  const sheet=files['light_'+lightMode];
+  if(sheet?.complete&&sheet.naturalWidth){
+    ctx.save();
+    ctx.beginPath();ctx.moveTo(1007,282);
+    ctx.quadraticCurveTo(1105,275,1203,282);
+    ctx.lineTo(1203,300);ctx.lineTo(1007,300);ctx.closePath();ctx.clip();
+    ctx.drawImage(sheet,1007,340,196,26,1007,277,196,24);
+    ctx.restore();
+  }
   ctx.restore();ctx.imageSmoothingEnabled=true;
  }
 }
@@ -698,7 +722,7 @@ function setControlEdit(active){layoutEdit=active;document.body.classList.toggle
 function updateSliders(){ $('#padSize').value=String(layout.pad.size);$('#padSizeValue').textContent=layout.pad.size+'px';
  $('#actionSize').value=String(layout.action.size);$('#actionSizeValue').textContent=layout.action.size+'px';
  $('#controlsOpacity').value=String(Math.round(layout.opacity*100));$('#controlsOpacityValue').textContent=Math.round(layout.opacity*100)+'%';}
-function openControls(){controlsPanel.hidden=false;$('#modal').hidden=true;lightMenu.hidden=true;weatherMenu.hidden=true;updateSliders();placeControls();resetJoystick()}
+function openControls(){controlsPanel.hidden=false;$('#modal').hidden=true;document.body.classList.remove('modal-open');lightMenu.hidden=true;weatherMenu.hidden=true;updateSliders();placeControls();resetJoystick()}
 function closeControls(){setControlEdit(false);controlsPanel.hidden=true;saveLayout()}
 controlEditButton.addEventListener('click',openControls);
 $('#editControls').addEventListener('click',()=>setControlEdit(!layoutEdit));
@@ -723,7 +747,13 @@ window.addEventListener('keydown',e=>{const k=e.key.length===1?e.key.toLowerCase
 window.addEventListener('keyup',e=>keyState.delete(e.key.length===1?e.key.toLowerCase():e.key));
 window.addEventListener('blur',()=>{keyState.clear();resetJoystick();audioSuspend()});
 window.addEventListener('focus',()=>{if(!gamePaused)audioResume()});
-$('#help').onclick=()=>{$('#modal').hidden=false;resetJoystick()};$('#close').onclick=()=>$('#modal').hidden=true;
+function openHelpModal(){const modal=$('#modal');modal.hidden=false;lightMenu.hidden=true;weatherMenu.hidden=true;resetJoystick();document.body.classList.add('modal-open');}
+function closeHelpModal(){const modal=$('#modal');modal.hidden=true;document.body.classList.remove('modal-open');}
+$('#help').onclick=openHelpModal;
+$('#close').onclick=closeHelpModal;
+$('#closeHelpTop').onclick=closeHelpModal;
+$('#modal').addEventListener('pointerdown',e=>{if(e.target===e.currentTarget)closeHelpModal()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#modal').hidden)closeHelpModal()});
 // Debug-only hooks for screenshot/geometry tests, inert during normal play.
 if(new URLSearchParams(location.search).has('qa'))window.__pianistTest={getState:()=>({x:player.x,y:player.y,dir:player.dir,pose:player.pose,lightMode,weather,cameraY,balconyOpening,layout,gamePaused,ambientOn,speed:player.speed,bedroomDoorAngle,frontDoorMotion,bathDoorMotion,dialogueText:dialogueFull,dialogueOpen:!dialogue.hidden}),nearestId:()=>nearest()?.id||null,setPlayer:(x,y,dir)=>{hideDialogue();player.x=x;player.y=y;player.dir=dir||player.dir;player.pose=null;player.transition=null},setPose:(id,type)=>{const f=furniture[id]?.[type];if(f){player.transition=null;player.pose={id,type,x:f.x,y:f.y,exit:f.exit,face:f.face};player.x=f.x;player.y=f.y;}},setLighting,setWeather,passable,rooms,solids,objects,dialogueScript,interact,actorFilter,enterBackground,enterForeground,placeControls,isReady:()=>ready,loadedImages:()=>Object.keys(files).filter(n=>files[n]?.naturalWidth)};
 })();

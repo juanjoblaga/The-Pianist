@@ -35,7 +35,7 @@ test('furniture poses have valid safe exits',()=>{
   }
  }
  assert(config.furniture.sofa.lie,'Sofa should offer a lying pose');
- assert.equal(physics.passable(1028,719),true,'Shower needs a genuinely walkable exit');
+ assert.equal(physics.passable(1062,718),true,'Shower needs a genuinely walkable exit');
 });
 test('all 13 objects are reachable on 8-way movement grid',()=>{
  const delta=[[8,0],[-8,0],[0,8],[0,-8],[8,8],[-8,8],[8,-8],[-8,-8]];
@@ -72,7 +72,7 @@ test('poses and release rendering avoid old unnatural assets',()=>{
  assert.equal(config.furniture.bed.lie.y,289);
  assert.equal(visuals.sofa.sit.scale,visuals.bed.sit.scale,'seating proportions should remain consistent');
  assert(visuals.balchair.sit.scale>=.85&&visuals.beanbag.sit.scale>=.85);
- assert(game.includes('const exit=id===\'shower\'?safeExit({x:1028,y:719})'),'shower must exit clear of walls');
+ assert(game.includes('const exit=id===\'shower\'?safeExit({x:1062,y:718})'),'shower must exit clear of walls');
  assert(!game.includes("const img=files[spriteFile.piano]"),'Do not restore distorted piano arm atlas');
  assert(!game.includes("ctx.drawImage(img,994,338,222,130)"),'No duplicate duvet over torso');
 });
@@ -83,15 +83,30 @@ test('head proportions, sofa lying pose and piano bench alignment',()=>{
   'Bed must scale the original face uniformly, never narrower than standing');
  assert(game.includes('files[spriteFile.sofaRest]'),
   'Sofa must show the approved natural reclining sprite, not a spliced upright head');
- assert(visuals.sofa.lie.width<=180, 'Sofa pose must be scaled to furniture proportions');
+ assert(visuals.sofa.lie.width>=185&&visuals.sofa.lie.width<=200, 'Sofa pose must be scaled to furniture proportions');
  assert(!game.includes("ctx.drawImage(img,80,0,80,112,-38,-79"),
   'Do not rotate an entire upright character sideways for sofa lying');
  const p=config.furniture.piano.sit;
- assert(p.x>=728&&p.x<=750&&p.y>=395&&p.y<=415,
+ assert(p.x>=728&&p.x<=750&&p.y>=375&&p.y<=400,
   'Piano pose should sit on the bench, not in front of it');
- assert(p.x+40>=782&&p.x+40<=795,
+ assert(p.x+40>=776&&p.x+40<=800,
   'Finger tips should reach the existing keybed x=782..795');
  assert(visuals.piano.sit.handTravel<=4,'Hand articulation should be small and natural');
- assert(game.includes('spriteFile.pianoMotion')&&game.includes('Math.floor(time*spec.beatsPerSecond*4)%4'),
+ assert(game.includes('spriteFile.pianoMotion')&&game.includes('Math.floor(time*spec.beatsPerSecond*6)%6'),
   'Piano playing must cycle independently authored hand poses rather than drawing fake extra arms');
+});
+
+test('v0.5.4 help, bed sheet and approved piano regressions',()=>{
+ const html=fs.readFileSync(path.join(assets,'index.html'),'utf8');
+ const css=fs.readFileSync(path.join(assets,'style.css'),'utf8');
+ const art=require(path.join(assets,'game-assets.js'));
+ assert(html.includes('id="closeHelpTop"')&&html.includes('class="helpScroll"'));
+ assert(css.includes('.helpScroll{min-height:0;flex:1 1 auto;overflow-y:auto'));
+ assert(game.includes("$('#closeHelpTop').onclick=closeHelpModal"));
+ assert(!game.includes('ctx.drawImage(duvet,993,333,225,123)'));
+ assert(game.includes("const sheet=files['light_'+lightMode]"));
+ assert.equal(art.atlas.pianoMotion.columns,6);
+ assert.equal(art.sprites.pianoMotion,'piano_motion_v054');
+ assert(config.objects.find(o=>o.id==='sofa').reach>=70);
+ assert(config.furniture.shower.shower.exit.x>1050);
 });

@@ -19,6 +19,22 @@ const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
   const initial=await page.evaluate(()=>window.__pianistTest.getState());
   assert(initial.x>0&&initial.y>0);
   await page.screenshot({path:imageDir+'/01-apartment.png'});
+  // Landscape Android viewport: help scroll, fixed close and sofa contact.
+  await page.setViewportSize({width:844,height:390});
+  await page.locator('#help').click();
+  const help=await page.locator('.helpScroll').evaluate(el=>({scroll:el.scrollHeight,client:el.clientHeight,overflow:getComputedStyle(el).overflowY}));
+  assert(help.scroll>help.client&&help.overflow==='auto','Help cannot scroll on Android landscape');
+  await page.locator('.helpScroll').evaluate(el=>{el.scrollTop=el.scrollHeight});
+  assert(await page.locator('.helpScroll').evaluate(el=>el.scrollTop)>0);
+  await page.locator('#closeHelpTop').click();
+  assert(await page.locator('#modal').evaluate(el=>el.hidden),'Close X cannot dismiss help');
+  await page.locator('#help').click();await page.locator('#close').click();
+  assert(await page.locator('#modal').evaluate(el=>el.hidden),'Continue cannot dismiss help');
+  await page.setViewportSize({width:1365,height:768});
+  for(const [x,y,dir] of [[390,410,'up'],[515,414,'up'],[608,278,'left'],[405,393,'up'],[570,336,'left']]){
+   const target=await page.evaluate(({x,y,dir})=>{const q=window.__pianistTest;q.setPlayer(x,y,dir);return {safe:q.passable(x,y),id:q.nearestId()}},{x,y,dir});
+   assert(target.safe&&target.id==='sofa','Missing sofa interaction at '+x+','+y);
+  }
   // Real keyboard movement and diagonal input on the same collision model.
   const start=await page.evaluate(()=>window.__pianistTest.getState());
   await page.keyboard.down('ArrowRight');await pause(220);await page.keyboard.up('ArrowRight');
@@ -94,7 +110,7 @@ const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
     const seated=await page.evaluate(()=>window.__pianistTest.getState());
     assert(seated.pose&&seated.pose.id===id,'Pose failed: '+id);
     if(id==='piano'){
-      const getKeys=()=>page.evaluate(()=>Array.from(document.querySelector('#game').getContext('2d').getImageData(779,338,27,33).data));
+      const getKeys=()=>page.evaluate(()=>Array.from(document.querySelector('#game').getContext('2d').getImageData(740,294,50,55).data));
       const a=await getKeys();
       await pause(265);
       const b=await getKeys();
@@ -120,7 +136,7 @@ const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
   await pause(850);
   assert(await page.evaluate(()=>window.__pianistTest.passable(window.__pianistTest.getState().x,window.__pianistTest.getState().y)),'Stuck after shower');
   const showerExit=await page.evaluate(()=>window.__pianistTest.getState());
-  assert(Math.hypot(showerExit.x-1028,showerExit.y-719)<2,'Shower exit must be at clear bathroom floor');
+  assert(Math.hypot(showerExit.x-1062,showerExit.y-718)<2,'Shower exit must be at clear bathroom floor');
   await page.evaluate(()=>{document.querySelector('#dialogue').hidden=true;});
   await page.keyboard.down('ArrowLeft');await pause(950);await page.keyboard.up('ArrowLeft');
   const movedOut=await page.evaluate(()=>window.__pianistTest.getState());

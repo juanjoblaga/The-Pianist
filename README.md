@@ -82,3 +82,15 @@ Manual physical-device checks are still required for real joystick thumb ergonom
 - Retains the approved five time-of-day exteriors, 13 interactions, authored text, weather, original input preferences, and 4-frame seated piano animation from v0.5.2.
 
 Please review screenshots and test on a phone before merging this stacked draft PR into the release branch.
+
+## v0.5.4 user review changes (draft)
+
+- Expanded the sofa hotspot around all accessible sides; preserved the v0.5.3 seating and collision clearance.
+- Slightly increased the approved natural reclining sprite (188×70) for character-scale consistency.
+- Moved shower recovery to safe nearby bathroom coordinates (1062,718).
+- Restored the plain white sheet over the head/neck in bed, matching each time-of-day plate without duplicating the blue duvet.
+- Rebuilt the Help UI into a vertically scrollable phone-safe panel with pinned X and Continue buttons, backdrop tap and Escape closing.
+- Restored the exact user-approved **six** piano-playing frames from the retained v0.4.6 sprite (existing Git blob), and moved playing position toward the centre of the piano keyboard / stool.
+- Kept all 5 time-of-day exteriors, original dialogue, 13 interactions, saved control settings and Android app identity. Version 0.5.4 / code 23.
+
+Browser test extended for mobile help menu and multiple sofa approach points. Draft pending physical phone approval.
