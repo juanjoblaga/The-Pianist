@@ -48,4 +48,20 @@ jobs:
                       for j in sorted(chosen):
                           print(f"{j+1:04d}: {lines[j][:400]}")
               print("=== SOURCE MATCHES END ===")
+              print("=== DETAILED SPRITE RENDER SOURCE START ===")
+              path='app/src/main/assets/game.js'
+              lines=z.read(path).decode('utf-8').splitlines()
+              for i,line in enumerate(lines):
+                  if (1<=i+1<=45) or (510<=i+1<=len(lines)):
+                      print(f"{i+1:04d}: {line}")
+              print("=== DETAILED SPRITE RENDER SOURCE END ===")
+              for entry in ("README.md","QA_NOTES.md","app/build.gradle","app/src/main/assets/index.html"):
+                  print("=== EXCERPT:",entry,"===")
+                  for ix,line in enumerate(z.read(entry).decode('utf-8').splitlines()):
+                      print(f"{ix+1:04d}: {line}")
+              for entry in ("app/src/main/assets/sitting_indoor.png","app/src/main/assets/piano_play_v045.png","app/src/main/assets/beanbag_clean_v042.png"):
+                  b=z.read(entry)
+                  import struct
+                  print("IMAGE",entry,"pixels",struct.unpack('>II',b[16:24]),"bytes",len(b))
+
           PY
