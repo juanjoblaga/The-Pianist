@@ -504,7 +504,7 @@ function drawReclining(p){
   const faceScale=poseStyles.sofa.lie.headScale;
   const w=74*faceScale,h=58*faceScale;
   ctx.save();ctx.filter=actorFilter(p.x,p.y);ctx.imageSmoothingEnabled=false;
-  ctx.drawImage(img,0,0,80,54,p.x+20-w/2,p.y-52,w,h);
+  ctx.drawImage(img,0,0,80,54,p.x+50-w/2,p.y-52,w,h);
   ctx.restore();ctx.imageSmoothingEnabled=true;
   return;
  }
