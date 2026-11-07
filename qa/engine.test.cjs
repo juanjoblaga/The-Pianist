@@ -88,6 +88,6 @@ test('head proportions, sofa lying pose and piano bench alignment',()=>{
  assert(p.x+40>=782&&p.x+40<=795,
   'Finger tips should reach the existing keybed x=782..795');
  assert(visuals.piano.sit.handTravel<=4,'Hand articulation should be small and natural');
- assert(game.includes('const leftTap=Math.sin(beat)')&&game.includes('const rightTap=Math.sin(beat*1.13+1.9)'),
+ assert(game.includes('leftTap=Math.sin(beat)')&&game.includes('rightTap=Math.sin(beat*1.13+1.9)'),
   'Hands must have independent note motions; avoid giant straight-arm frame');
 });
