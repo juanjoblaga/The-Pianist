@@ -74,7 +74,7 @@ const furniture={
  bed:{sit:{x:1103,y:502,face:'down',exit:{x:1103,y:526}},lie:{x:1104,y:289,face:'up',exit:{x:1103,y:526}}},
  balchair:{sit:{x:470,y:149,face:'left',exit:{x:527,y:144}}},
  beanbag:{sit:{x:759,y:149,face:'down',exit:{x:681,y:144}}},
- piano:{sit:{x:758,y:423,face:'right',exit:{x:699,y:420}}},
+ piano:{sit:{x:746,y:407,face:'right',exit:{x:699,y:420}}},
  shower:{shower:{x:1315,y:671,face:'up',exit:{x:1060,y:720}}}
 };
 
