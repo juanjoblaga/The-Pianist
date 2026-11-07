@@ -78,7 +78,7 @@ test('head proportions, sofa lying pose and piano bench alignment',()=>{
  const bed=visuals.bed.lie;
  assert(Math.abs(bed.headWidth/80-bed.headHeight/54)<.025,
   'Bed must scale the original face uniformly, never narrower than standing');
- assert(game.includes("ctx.drawImage(img,0,0,80,54,p.x+50-w/2"),
+ assert(game.includes("ctx.drawImage(img,0,0,80,54,p.x+40-w/2"),
   'Sofa should have an upright approved head at the body-end cushion');
  assert(!game.includes("ctx.drawImage(img,80,0,80,112,-38,-79"),
   'Do not rotate an entire upright character sideways for sofa lying');
@@ -88,6 +88,6 @@ test('head proportions, sofa lying pose and piano bench alignment',()=>{
  assert(p.x+40>=782&&p.x+40<=795,
   'Finger tips should reach the existing keybed x=782..795');
  assert(visuals.piano.sit.handTravel<=4,'Hand articulation should be small and natural');
- assert(game.includes('leftTap=Math.sin(beat)')&&game.includes('rightTap=Math.sin(beat*1.13+1.9)'),
-  'Hands must have independent note motions; avoid giant straight-arm frame');
+ assert(game.includes('spriteFile.pianoMotion')&&game.includes('Math.floor(time*spec.beatsPerSecond*4)%4'),
+  'Piano playing must cycle independently authored hand poses rather than drawing fake extra arms');
 });
