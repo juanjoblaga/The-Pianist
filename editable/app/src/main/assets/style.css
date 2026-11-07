@@ -26,3 +26,17 @@ body.editing-controls #controlsPanel h2{display:none}
 #loadStatus:not([hidden]){position:absolute;left:50%;top:47%;transform:translate(-50%,-50%);z-index:45;background:#17202cdd;color:#e7d1a8;border:1px solid #9f8462;border-radius:9px;padding:12px 20px;font-size:13px;pointer-events:auto;min-width:180px;text-align:center}
 /* v0.4.5: keep approved navy/gold panel and express disabled future location clearly. */
 #dialoguechoices button:disabled{opacity:.43;cursor:default;background:#1e2733}
+
+/* v0.5.4: mobile landscape scrollable help menu with accessible close. */
+#modal[hidden]{display:none}
+#modal:not([hidden]){display:flex;align-items:center;justify-content:center;padding:12px;overflow:hidden;touch-action:none}
+#modal>.helpCard{width:min(520px,94vw);max-width:94vw;max-height:min(86dvh,630px);min-height:0;padding:0;display:flex;flex-direction:column;overflow:hidden;border-radius:12px;touch-action:pan-y}
+.helpHeader,.helpFooter{display:flex;align-items:center;gap:10px;flex:0 0 auto;padding:12px 16px;background:#1c2330}
+.helpHeader{border-bottom:1px solid #ffffff27;justify-content:space-between}
+.helpHeader h2{font-size:clamp(15px,2.7vh,22px);line-height:1.2;margin:0}
+#modal #closeHelpTop{min-width:38px;min-height:38px;border:1px solid #ffffff65;background:#35495a;border-radius:50%;font-size:25px;line-height:1;padding:0}
+.helpScroll{min-height:0;flex:1 1 auto;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y;padding:12px 16px 18px;line-height:1.45;font-size:clamp(12px,2.35vh,16px)}
+.helpScroll p{margin:0 0 12px}
+.helpFooter{border-top:1px solid #ffffff27;justify-content:flex-end;flex-wrap:wrap}
+.helpFooter button{white-space:nowrap}
+@media(max-height:450px){#modal>.helpCard{max-height:91dvh}.helpHeader,.helpFooter{padding:6px 12px}.helpScroll{padding:7px 12px;font-size:13px}.helpHeader h2{font-size:17px}}

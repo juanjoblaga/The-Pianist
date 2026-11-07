@@ -8,7 +8,7 @@
 const poses={
   sofa:{
     sit:{visual:'sit',scale:.90},
-    lie:{visual:'sofaLie',width:174,height:65}
+    lie:{visual:'sofaLie',width:188,height:70}
   },
   bed:{
     sit:{visual:'sit',scale:.90},
@@ -16,7 +16,7 @@ const poses={
   },
   balchair:{sit:{visual:'sit',scale:.88}},
   beanbag:{sit:{visual:'sit',scale:.88,beanbag:true}},
-  piano:{sit:{visual:'piano',scale:.93,handTravel:3,beatsPerSecond:2.2}},
+  piano:{sit:{visual:'piano',scale:.93,handTravel:3,beatsPerSecond:1.35}},
   shower:{shower:{visual:'mosaic'}}
 };
 root.ThePianistPoses=poses;
