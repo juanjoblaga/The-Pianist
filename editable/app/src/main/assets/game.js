@@ -463,38 +463,61 @@ function drawSitting(x,y,face,phase,opacity=1,scale=1,beanbag=false){
  ctx.restore();ctx.imageSmoothingEnabled=true;
 }
 function drawPianoPlaying(p){
- // The separate four-frame atlas had elongated, disconnected arms.
- // Reuse the anatomically approved right-facing seated frame, with a tiny
- // body weight shift only. No synthetic elbows or sound are invented.
- ctx.save();ctx.translate(0,Math.sin(time*2.7)*.7);
- drawSitting(p.x,p.y,p.face,0,1,poseStyles.piano.sit.scale);
- ctx.restore();
+ // The piano is a narrow keybed at x≈786; the existing approved side-view
+ // seated sprite already contains natural upper arms. Keep those and only
+ // articulate short wrists/fingers at the keyboard—never stretch the arms.
+ const spec=poseStyles.piano.sit;
+ drawSitting(p.x,p.y,'right',0,1,spec.scale);
+ const beat=time*spec.beatsPerSecond*2*Math.PI;
+ const leftTap=Math.sin(beat),rightTap=Math.sin(beat*1.13+1.9);
+ const reach=spec.handTravel;
+ const L={x:p.x+38+Math.sin(beat*.37)*1.2,y:p.y-57+leftTap*reach};
+ const R={x:p.x+40+Math.cos(beat*.29)*1.4,y:p.y-45+rightTap*reach};
+ ctx.save();ctx.imageSmoothingEnabled=false;
+ // Small elbow-to-wrist extensions, following the two real original arms.
+ // Both hands reach different notes on the existing keyboard plane.
+ for(const [startX,startY,hand] of [[p.x+21,p.y-54,L],[p.x+23,p.y-46,R]]){
+  ctx.strokeStyle='#2c272e';ctx.lineWidth=5;
+  ctx.beginPath();ctx.moveTo(startX,startY);ctx.quadraticCurveTo(startX+10,startY+4,hand.x-3,hand.y);ctx.stroke();
+  ctx.strokeStyle='#e49b72';ctx.lineWidth=3.2;
+  ctx.beginPath();ctx.moveTo(startX+4,startY+1);ctx.quadraticCurveTo(startX+12,startY+3,hand.x-1,hand.y);ctx.stroke();
+  ctx.fillStyle='#ffb681';ctx.fillRect(Math.round(hand.x-2),Math.round(hand.y-2),5,3);
+  ctx.fillStyle='#a86450';ctx.fillRect(Math.round(hand.x+2),Math.round(hand.y),2,2);
+ }
+ ctx.restore();ctx.imageSmoothingEnabled=true;
 }
 function drawReclining(p){
  const img=files[spriteFile.idle];
  if(!img?.complete||!img.naturalWidth)return;
  if(p.id==='sofa'){
-  // Full approved body rotated onto the long sofa cushion.
-  // Head rests by the cushion on the right; legs remain on the sofa.
+  // A standing profile rotated whole makes the face sideways. Instead the
+  // approved clothed body rests horizontally, while a front-facing head looks
+  // upward from the cushion. Both use the exact original character artwork.
+  const scale=poseStyles.sofa.lie.bodyScale;
   ctx.save();ctx.filter=actorFilter(p.x,p.y);ctx.imageSmoothingEnabled=false;
-  ctx.translate(p.x,p.y);ctx.rotate(Math.PI/2);
-  ctx.drawImage(img,80,0,80,112,-38,-79,76,158);
+  ctx.translate(p.x+18,p.y);
+  ctx.rotate(Math.PI/2);
+  // Side-view torso and legs only: source crop starts below the chin.
+  ctx.drawImage(img,80,61,80,51,-35*scale,-6*scale,70*scale,91*scale);
+  ctx.restore();
+  // Original front-facing face; no sideways eyes or reduced head width.
+  const faceScale=poseStyles.sofa.lie.headScale;
+  const w=74*faceScale,h=58*faceScale;
+  ctx.save();ctx.filter=actorFilter(p.x,p.y);ctx.imageSmoothingEnabled=false;
+  ctx.drawImage(img,0,0,80,54,p.x+20-w/2,p.y-52,w,h);
   ctx.restore();ctx.imageSmoothingEnabled=true;
   return;
  }
  if(p.id==='bed'){
-  // The pillow holds only the head. The painted linen covers the shoulders,
-  // torso and legs: no upright, square-cut torso floating in the white sheet.
-  // Only the naturally shaped hair/face remains over the pillow. The rest
-  // is already under the intact white sheet in the original base painting.
-  // No cropped black torso and no artificial white rectangular overlay.
+  // Maintain the actual sprite's head proportions. Previously 80×54 was
+  // stretched to 72×61, producing a tall, unnaturally narrow face.
+  const spec=poseStyles.bed.lie;
+  const w=spec.headWidth,h=spec.headHeight;
   ctx.save();ctx.filter=actorFilter(p.x,p.y);ctx.imageSmoothingEnabled=false;
-  ctx.fillStyle='#bb815f';ctx.fillRect(p.x-5,p.y-10,10,11);
-  ctx.drawImage(img,0,0,80,54,p.x-36,p.y-63,72,61);
+  ctx.drawImage(img,0,0,80,54,p.x-w/2,p.y-h-6,w,h);
   ctx.restore();ctx.imageSmoothingEnabled=true;
  }
 }
-
 function drawShower(p){
  // No unclothed character artwork: a discreet opaque mosaic and small water ripples
  // occupy the shower cubicle while the player is hidden behind the privacy glass.
