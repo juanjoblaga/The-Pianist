@@ -509,17 +509,16 @@ function drawReclining(p){
   // The pillow holds only the head. The painted linen covers the shoulders,
   // torso and legs: no upright, square-cut torso floating in the white sheet.
   ctx.save();ctx.filter=actorFilter(p.x,p.y);ctx.imageSmoothingEnabled=false;
-  ctx.drawImage(img,0,0,80,65,p.x-37,p.y-66,74,72);
+  ctx.drawImage(img,0,0,80,62,p.x-35,p.y-65,70,68);
   ctx.restore();ctx.imageSmoothingEnabled=true;
-  // Reuse the *same* day's approved white sheet texture from the base plate.
-  // Drawing that section higher forms a soft fold just below the character's
-  // neck without a second patterned duvet or unapproved naked-body sprite.
-  const sheet=files['light_'+lightMode];
-  if(sheet?.complete&&sheet.naturalWidth){
-   ctx.save();ctx.globalAlpha=.96;
-   ctx.drawImage(sheet,1007,349,197,61,1007,314,197,91);
-   ctx.restore();
-  }
+  // A small feathered linen edge hides the shirt/torso. Do not paste a broad
+  // rectangular section over the bed: that looked like a mismatched blanket.
+  ctx.save();
+  const fade=ctx.createLinearGradient(0,p.y-13,0,p.y+11);
+  fade.addColorStop(0,'rgba(208,211,219,0)');
+  fade.addColorStop(1,'rgba(208,211,219,.95)');
+  ctx.fillStyle=fade;ctx.fillRect(p.x-37,p.y-13,74,24);
+  ctx.restore();
  }
 }
 
