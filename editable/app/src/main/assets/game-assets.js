@@ -16,6 +16,7 @@ const catalog={
   beanbagSit:'beanbag_clean_v042',
   piano:'piano_play_v045',
   pianoMotion:'piano_motion_v052',
+  sofaRest:'sofa_lie_v053',
   duvet:'duvet_foreground'
  },
  atlas:{
@@ -25,7 +26,8 @@ const catalog={
   sit:{columns:4,rows:1,width:128,height:170},
   beanbagSit:{columns:4,rows:1,width:128,height:170},
   piano:{columns:4,rows:1,width:128,height:170},
-  pianoMotion:{columns:4,rows:1,width:128,height:170}
+  pianoMotion:{columns:4,rows:1,width:128,height:170},
+  sofaRest:{columns:3,rows:1,width:240,height:96}
  }
 };
 catalog.persistentAssets=Object.values(catalog.sprites);

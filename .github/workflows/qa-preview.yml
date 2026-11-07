@@ -45,6 +45,7 @@ jobs:
           # Editable resources override the original ZIP, never signing secrets.
           rsync -a editable/app/src/main/ build-project/app/src/main/
           python3 qa/generate-daylight.py
+          python3 qa/restore-doors.py
           # A single manifest sets versionCode/versionName and matching HUD text.
           python3 qa/set-version.py
       - name: Browser simulation of apartment

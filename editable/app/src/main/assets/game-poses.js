@@ -8,7 +8,7 @@
 const poses={
   sofa:{
     sit:{visual:'sit',scale:.90},
-    lie:{visual:'sofaLie',bodyScale:.87,headScale:1.02}
+    lie:{visual:'sofaLie',width:174,height:65}
   },
   bed:{
     sit:{visual:'sit',scale:.90},

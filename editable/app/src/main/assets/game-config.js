@@ -31,8 +31,8 @@ const rooms=[
 ];
 
 const solids=[
- [275,202,581,303],[273,281,380,385],// sectional sofa
- [431,333,551,405],                   // coffee table
+ [275,202,581,297],[273,281,370,379],// sectional sofa
+ [442,344,540,395],                   // coffee table
  [246,270,280,472],                   // shelves
  [383,464,580,614],                   // dining table
  [772,215,874,456],                   // piano
@@ -70,12 +70,12 @@ const objects=[
 const furniture={
  // Furniture anchors are virtual canvas pixels, not walking destinations.
  // Each seat returns the player to their actual pre-interaction floor position.
- sofa:{sit:{x:450,y:307,face:'down',exit:{x:465,y:426}},lie:{x:451,y:286,face:'right',exit:{x:465,y:426}}},
+ sofa:{sit:{x:450,y:307,face:'down',exit:{x:465,y:426}},lie:{x:462,y:286,face:'right',exit:{x:465,y:426}}},
  bed:{sit:{x:1103,y:502,face:'down',exit:{x:1103,y:526}},lie:{x:1104,y:289,face:'up',exit:{x:1103,y:526}}},
  balchair:{sit:{x:470,y:149,face:'left',exit:{x:527,y:144}}},
  beanbag:{sit:{x:759,y:149,face:'down',exit:{x:681,y:144}}},
  piano:{sit:{x:746,y:407,face:'right',exit:{x:699,y:420}}},
- shower:{shower:{x:1315,y:671,face:'up',exit:{x:1060,y:720}}}
+ shower:{shower:{x:1315,y:671,face:'up',exit:{x:1028,y:719}}}
 };
 
 const config={dialogueScript,rooms,solids,objects,furniture};

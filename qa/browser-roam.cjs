@@ -120,11 +120,11 @@ const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
   await pause(850);
   assert(await page.evaluate(()=>window.__pianistTest.passable(window.__pianistTest.getState().x,window.__pianistTest.getState().y)),'Stuck after shower');
   const showerExit=await page.evaluate(()=>window.__pianistTest.getState());
-  assert(Math.hypot(showerExit.x-1060,showerExit.y-720)<2,'Shower exit must be at clear bathroom floor');
+  assert(Math.hypot(showerExit.x-1028,showerExit.y-719)<2,'Shower exit must be at clear bathroom floor');
   await page.evaluate(()=>{document.querySelector('#dialogue').hidden=true;});
-  await page.keyboard.down('ArrowLeft');await pause(160);await page.keyboard.up('ArrowLeft');
+  await page.keyboard.down('ArrowLeft');await pause(950);await page.keyboard.up('ArrowLeft');
   const movedOut=await page.evaluate(()=>window.__pianistTest.getState());
-  assert(movedOut.x<showerExit.x-5,'Avatar cannot move away after shower');
+  assert(movedOut.x<930,'Avatar cannot navigate back into living room after shower');
   const fixtures=[['mirror',1178,695,'up'],['toilet',1207,603,'down'],['shower',1250,590,'right']];
   for(const [id,x,y,dir] of fixtures){
    const target=await page.evaluate(({x,y,dir})=>{window.__pianistTest.setPlayer(x,y,dir);return window.__pianistTest.nearestId()},{x,y,dir});

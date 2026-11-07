@@ -71,3 +71,14 @@ Consider immediately changing the GitHub repository visibility to **private** an
 Node geometry and asset tests are deterministic. The browser smoke test actually loads the apartment art and simulates movement, approaching 13 objects, lying/sitting, showering, weather, audio UI, controls and saved preferences. Screenshots are captured for review.
 
 Manual physical-device checks are still required for real joystick thumb ergonomics, landscape sizing, music/audio quality, pixel-art appearance and Android installation/data retention.
+
+## v0.5.3 regression repairs (draft)
+
+- Restores the original approved 3-frame reclining sprite from v0.4.6, now at a proportional 174×65 world-pixel footprint on the sofa. The original pillow and upward-looking face remain.
+- Retains the known-good sofa sitting and bed-lying anchors from the v0.5.2 branch, rather than v0.4.6's regression.
+- Makes the walkable corridor between sofa and coffee table less brittle while preserving solid furniture interiors. A real browser movement test crosses it.
+- After showering, returns the character to (1028,719) on clear bathroom floor, then tests a full walk back into the living room.
+- Adds qa/restore-doors.py: removes only the two triangular door leaves painted into the five interior light images, reusing same-scene floor texture. No original paintings in editable/ are destructively overwritten, and no unapproved replacement apartment is generated. Animated door mechanics still await separate art approval.
+- Retains the approved five time-of-day exteriors, 13 interactions, authored text, weather, original input preferences, and 4-frame seated piano animation from v0.5.2.
+
+Please review screenshots and test on a phone before merging this stacked draft PR into the release branch.
