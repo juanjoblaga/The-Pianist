@@ -48,6 +48,10 @@ jobs:
                       for j in sorted(chosen):
                           print(f"{j+1:04d}: {lines[j][:400]}")
               print("=== SOURCE MATCHES END ===")
+              import base64
+              print("=== SITTING_IMAGE_B64_START ===")
+              print(base64.b64encode(z.read("app/src/main/assets/sitting_indoor.png")).decode("ascii"))
+              print("=== SITTING_IMAGE_B64_END ===")
               print("=== DETAILED SPRITE RENDER SOURCE START ===")
               path='app/src/main/assets/game.js'
               lines=z.read(path).decode('utf-8').splitlines()
@@ -65,3 +69,10 @@ jobs:
                   print("IMAGE",entry,"pixels",struct.unpack('>II',b[16:24]),"bytes",len(b))
 
           PY
+
+      - name: Export v0.4.5 source for compatibility inspection
+        uses: actions/upload-artifact@v4
+        with:
+          name: ThePianist-v0.4.5-original-source
+          path: ThePianistAndroid-GitHubBuild-v0.4.5.zip
+          if-no-files-found: error
