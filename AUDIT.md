@@ -1,4 +1,19 @@
-# The Pianist 0.5.0 — fresh engineering and gameplay audit
+# The Pianist — engineering and visual QA audit
+
+## v0.5.1 follow-up: user screenshot review
+
+The user reviewed gameplay captures and reported that the original 0.5.0 pass was NOT acceptable as a visual sign-off. Treat this list as more important than earlier generic "passes".
+
+- **Sitting:** Common pose scales/anchors now live in `game-poses.js`. Adjust after screenshot review; never tweak pose sizes independently in scattered renderer conditions.
+- **Sofa lying:** Restored as an explicit user request. Uses the approved idle side sprite rotated horizontally over the long sofa; button and safe stand exit regression tested.
+- **Sofa exit:** In 0.5.0 furniture transition x/y travelled in a straight line through solids. In 0.5.1 entry/exit cross-fades between an actual passable interaction point and the furniture anchor. Standing returns to the exact position where the interaction started.
+- **Piano playing:** Huge extended-arm atlas is disabled. Use restrained approved seated sprite (no fake moving fingers); original finger articulation still needs an appropriately authored sprite.
+- **Bed lying:** Head moved to the pillows, and the torso is covered with the same lighting-specific white linen texture used on the bed plate. Check that it does not look like an upright cropped figure.
+- **Shower exit:** Fixed staging at `(1060,720)` on clear bathroom floor. Browser checks both physical passability and the ability to walk away afterward.
+- **Bathroom selection:** Direction-aware nearest targeting resolves mirror/toilet/shower and action button displays its selected target.
+- **Outdoor lighting:** Nightly amber-lit windows were baked into all five original exterior art plates. Build derives daytime corrections for morning/afternoon and a milder sunrise. Night and sunset remain warm; original editable artwork stays unchanged.
+- **Doors:** Upright procedural rotating additions removed, replaced by top-down hinge slabs. **Still not artistically finished:** old open-door triangles remain painted into the original light plates. Do not obscure them with crude inpainting; a true art-layer correction must be approved.
+- **QA:** Browser regression asserts old sofa-table teleport is absent, sofa lying exists, shower exits are walkable, bathrooms select by facing, and night differs from day. Physical Android and human visual QA remain outstanding.
 
 This review starts from the user's approved v0.4.5 ZIP, not a redesigned game. **Story and dialogue are owned by the user; this work changes technical infrastructure and repairs visual/interaction bugs only.**
 
