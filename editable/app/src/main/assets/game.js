@@ -8,6 +8,7 @@ const files=Object.create(null);
 const art=window.ThePianistAssets;
 const modes=art.modes,modePrefixes=art.modeLayers,persistentAssets=art.persistentAssets;
 const spriteFile=art.sprites;
+const poseStyles=window.ThePianistPoses;
 const assetPromises=Object.create(null);
 const imageExtension=n=>n.startsWith('world_')||n.startsWith('light_')?'jpg':'png';
 function ensureAsset(name){
@@ -103,14 +104,25 @@ dialogue.addEventListener('pointerdown',e=>{
 const physics=window.ThePianistPhysics.create(window.ThePianistConfig,9);
 const passable=physics.passable;
 const nearest=()=>physics.nearest(player.x,player.y,player.dir);
-function changePose(id,type){if(id==='sofa'&&type==='lie')return;const data=furniture[id]?.[type];if(!data)return;const fromX=player.x,fromY=player.y;const approach=data.exit;
- // Reach condition enforced by nearest(); move towards a nearby safe approach point.
- player.transition={kind:'enter',id,type,t:0,fromX,fromY,toX:data.x,toY:data.y,exit:approach,face:data.face};
- player.moving=false;player.phase=0;resetJoystick();}
+function changePose(id,type){
+ const data=furniture[id]?.[type];if(!data)return;
+ // Preserve the exact approach where the player could actually stand.
+ // The shower has a dedicated clear exit by the bathroom door, not on a wall.
+ const exit=id==='shower'?safeExit({x:1060,y:720}):
+   (passable(player.x,player.y)?{x:player.x,y:player.y}:safeExit(data.exit));
+ player.transition={kind:'enter',id,type,t:0,fromX:player.x,fromY:player.y,
+   toX:data.x,toY:data.y,exit,face:data.face,exitDir:player.dir};
+ player.moving=false;player.phase=0;resetJoystick();
+}
 function safeExit(target){return physics.safeExit(target,{x:730,y:570});}
-function stand(){const old=player.pose;if(!old)return;
+function stand(){
+ const old=player.pose;if(!old)return;
  const exit=safeExit(old.exit);
- player.transition={kind:'leave',id:old.id,type:old.type,t:0,fromX:player.x,fromY:player.y,toX:exit.x,toY:exit.y,exit,face:old.face};player.pose=null}
+ player.transition={kind:'leave',id:old.id,type:old.type,t:0,
+  fromX:player.x,fromY:player.y,toX:exit.x,toY:exit.y,
+  exit,face:old.face,exitDir:old.id==='shower'?'down':(old.exitDir||old.face)};
+ player.pose=null;player.moving=false;resetJoystick();
+}
 
 let showerSeconds=0;
 function interact(){
@@ -129,7 +141,8 @@ function interact(){
   showDialogue('piano',[{label:'Play',action:()=>changePose('piano','sit')},{label:'Leave',action:()=>{}}]);return;
  }
  if(id==='sofa'){
-  showDialogue('sofa',[{label:'Sit',action:()=>changePose('sofa','sit')},{label:'Leave',action:()=>{}}]);return;
+  showDialogue('sofa',[{label:'Sit',action:()=>changePose('sofa','sit')},
+   {label:'Lie down',action:()=>changePose('sofa','lie')},{label:'Leave',action:()=>{}}]);return;
  }
  if(id==='bed'){
   showDialogue('bed',[{label:'Lie down',action:()=>changePose('bed','lie')},
@@ -171,25 +184,34 @@ function drawBalconyDoor(){
 }
 let bedroomDoorAngle=0,frontDoorMotion=0,bathDoorMotion=0;
 function drawPhysicalDoors(){
- const front=files['frontdoor_'+lightMode],bath=files['bathdoor_'+lightMode];
- // Rotations around physically correct hinges; source door artwork was removed from base plate.
- if(front?.complete&&front.naturalWidth){ctx.save();ctx.translate(719,811);
-  ctx.rotate(-.28*ease(frontDoorMotion));ctx.drawImage(front,704-719,801-811);ctx.restore();}
- if(bath?.complete&&bath.naturalWidth){ctx.save();ctx.translate(984,739);
-  ctx.rotate(-.55*ease(bathDoorMotion));ctx.drawImage(bath,978-984,733-739);ctx.restore();}
- // Bedroom entrance uses the painted architecture; no duplicated swinging leaf.
+ // Doors are TOP-DOWN floor-plan slabs, not upright perspective PNG leaves.
+ // The old rotating upright assets appeared to fall across the floor.
+ ctx.save();
+ const front=ease(frontDoorMotion);
+ ctx.translate(719,823);ctx.rotate(-front*.78);
+ ctx.fillStyle='#9c6942';ctx.strokeStyle='#36241c';ctx.lineWidth=3;
+ ctx.fillRect(0,-6,117,12);ctx.strokeRect(0,-6,117,12);
+ ctx.fillStyle='#e4c88b';ctx.fillRect(104,-4,5,3);
+ ctx.restore();
+ ctx.save();
+ const bath=ease(bathDoorMotion);
+ ctx.translate(987,739);ctx.rotate(-bath*.95);
+ ctx.fillStyle='#a17655';ctx.strokeStyle='#443126';ctx.lineWidth=2.5;
+ ctx.fillRect(-5,0,10,78);ctx.strokeRect(-5,0,10,78);
+ ctx.fillStyle='#d4b786';ctx.fillRect(-3,62,4,4);
+ ctx.restore();
 }
 function updateDoors(dt){
  const bedroomNear=Math.hypot(player.x-922,player.y-554)<115;
- const frontNear=Math.hypot(player.x-755,player.y-884)<126;
- const bathNear=Math.hypot(player.x-994,player.y-790)<104;
+ const frontNear=Math.hypot(player.x-767,player.y-828)<118;
+ const bathNear=Math.hypot(player.x-1001,player.y-738)<118;
  frontDoorMotion+=(Number(frontNear)-frontDoorMotion)*Math.min(1,dt*3.3);
  bathDoorMotion+=(Number(bathNear)-bathDoorMotion)*Math.min(1,dt*3.3);
  bedroomDoorAngle+=(Number(bedroomNear)-bedroomDoorAngle)*Math.min(1,dt*4.5);
  const near=Math.abs(player.x-614)<115&&Math.abs(player.y-206)<112;
- const target=near?1:0;
- balconyOpening+=(target-balconyOpening)*Math.min(1,dt*5.5);
+ balconyOpening+=(Number(near)-balconyOpening)*Math.min(1,dt*5.5);
 }
+
 // Stable deterministic particle seeds: arrays are tiny and reuse the same objects.
 const rng=(n)=>{let v=Math.sin(n*111.371+23.77)*43758.5453;return v-Math.floor(v)};
 const particles=Array.from({length:135},(_,i)=>({x:rng(i*6+1),y:rng(i*6+2),speed:.5+rng(i*6+3)*1.35,size:.9+rng(i*6+4)*1.6,seed:rng(i*6+5)*9}));
@@ -439,7 +461,7 @@ function drawWalking(x,y,dir,moving,phase,opacity=1,scale=1){
  const diagonal=dir.includes('-');
  const img=moving?(diagonal?files[spriteFile.diagonalWalk]:files[spriteFile.walk]):files[spriteFile.idle];
  if(!img?.complete||!img.naturalWidth)return;
- ctx.save();ctx.globalAlpha=opacity;ctx.imageSmoothingEnabled=false;ctx.filter=actorFilter(x,y);
+ ctx.save();ctx.globalAlpha*=opacity;ctx.imageSmoothingEnabled=false;ctx.filter=actorFilter(x,y);
  const fw=101*scale,fh=143*scale;
  if(moving){
   const row=diagonal?({'down-left':0,'down-right':1,'up-left':2,'up-right':3}[dir]??0):(spriteRow[dir]??0);
@@ -457,34 +479,42 @@ function drawSitting(x,y,face,phase,opacity=1,scale=1,beanbag=false){
  const img=beanbag?files[spriteFile.beanbagSit]:files[spriteFile.sit];
  if(!img?.complete||!img.naturalWidth)return;
  const index=face==='right'?2:face==='left'?1:face==='up'?3:0;
- ctx.save();ctx.globalAlpha=opacity;ctx.imageSmoothingEnabled=false;ctx.filter=actorFilter(x,y);
+ ctx.save();ctx.globalAlpha*=opacity;ctx.imageSmoothingEnabled=false;ctx.filter=actorFilter(x,y);
  const w=116*scale,h=152*scale;
  const bob=Math.sin(time*.75)*.24;
  ctx.drawImage(img,index*128,0,128,170,x-w/2,y-h+bob,w,h);
  ctx.restore();ctx.imageSmoothingEnabled=true;
 }
 function drawPianoPlaying(p){
- const img=files[spriteFile.piano];if(!img?.complete||!img.naturalWidth)return;
- // Dedicated right-facing pianist. Arm and fingers extend to the visible keys.
- const w=116,h=150,frame=Math.floor(time*5)%4;
- ctx.save();ctx.filter=actorFilter(p.x,p.y);ctx.imageSmoothingEnabled=false;
- ctx.drawImage(img,frame*128,0,128,170,p.x-w/2,p.y-h,w,h);
- ctx.restore();ctx.imageSmoothingEnabled=true;
+ // The separate four-frame atlas had elongated, disconnected arms.
+ // Reuse the anatomically approved right-facing seated frame, with a tiny
+ // body weight shift only. No synthetic elbows or sound are invented.
+ ctx.save();ctx.translate(0,Math.sin(time*2.7)*.7);
+ drawSitting(p.x,p.y,p.face,0,1,poseStyles.piano.sit.scale);
+ ctx.restore();
 }
-// Lying in a top-down bed: the body is under the duvet; the approved head and
-// shoulders remain on the pillow. Never crop an unrelated walking animation.
 function drawReclining(p){
- if(p.id!=='bed')return; // Sofa lying remains intentionally disabled.
  const img=files[spriteFile.idle];
  if(!img?.complete||!img.naturalWidth)return;
- ctx.save();ctx.filter=actorFilter(p.x,p.y);ctx.imageSmoothingEnabled=false;
- // Natural upper-body overlap under the blanket, not a detached floating head.
- ctx.fillStyle='#292b35';
- ctx.beginPath();ctx.ellipse(p.x,p.y+6,30,32,0,0,Math.PI*2);ctx.fill();
- // The front-facing head from the approved character sheet; remainder is covered.
- ctx.drawImage(img,0,2,80,63,p.x-40,p.y-80,80,71);
- ctx.restore();ctx.imageSmoothingEnabled=true;
+ if(p.id==='sofa'){
+  // Full approved body rotated onto the long sofa cushion.
+  // Head rests by the cushion on the right; legs remain on the sofa.
+  ctx.save();ctx.filter=actorFilter(p.x,p.y);ctx.imageSmoothingEnabled=false;
+  ctx.translate(p.x,p.y);ctx.rotate(Math.PI/2);
+  ctx.drawImage(img,80,0,80,112,-38,-79,76,158);
+  ctx.restore();ctx.imageSmoothingEnabled=true;
+  return;
+ }
+ if(p.id==='bed'){
+  // Head and a little of the shoulders sit ON the pillows at their top edge,
+  // not in the middle of the duvet. The torso remains beneath the existing
+  // painted sheet/cover: no duplicate duvet slab is added.
+  ctx.save();ctx.filter=actorFilter(p.x,p.y);ctx.imageSmoothingEnabled=false;
+  ctx.drawImage(img,0,0,80,76,p.x-37,p.y-71,74,72);
+  ctx.restore();ctx.imageSmoothingEnabled=true;
+ }
 }
+
 function drawShower(p){
  // No unclothed character artwork: a discreet opaque mosaic and small water ripples
  // occupy the shower cubicle while the player is hidden behind the privacy glass.
@@ -506,26 +536,14 @@ function drawShower(p){
  ctx.restore();
 }
 function renderRest(p){
- if(p.type==='shower'){drawShower(p);return}
- if(p.type==='sit'){
-  if(p.id==='piano')drawPianoPlaying(p);
-  else if(p.id==='sofa')drawSitting(p.x,p.y-26,p.face,0,1,.78,false); // feet stay on the sofa
-  else if(p.id==='balchair')drawSitting(p.x,p.y-38,p.face,0,1,.75,false); // seat, not railing
-  else if(p.id==='beanbag')drawSitting(p.x,p.y-38,p.face,0,1,.75,true); // sit within cushion
-  else drawSitting(p.x,p.y,p.face,0,1,1,false);
- }
-
- else drawReclining(p);
- if(p.id==='bed'){
-  if(p.type==='lie'){
-   const img=files[spriteFile.duvet];
-   if(img.complete&&img.naturalWidth){ctx.save();ctx.drawImage(img,994,338,222,130);ctx.restore();}
-  } // No transplanted art strip over the seated sprite or bed footboard.
- }
- // Beanbag artwork is a single integrated cushion: no 9px furniture strip
- // is pasted over the character's feet (it previously cut them in half).
-
+ const style=poseStyles[p.id]?.[p.type];
+ if(!style)return;
+ if(style.visual==='mosaic'){drawShower(p);return;}
+ if(style.visual==='piano'){drawPianoPlaying(p);return;}
+ if(style.visual==='sit'){drawSitting(p.x,p.y,p.face,0,1,style.scale,!!style.beanbag);return;}
+ if(style.visual==='sofaLie'||style.visual==='bedLie'){drawReclining(p);}
 }
+
 function drawShoesAtEntrance(){
  // Character removes shoes at entrance. Existing interior sprites have charcoal socks.
  // Shoes are rendered from shapes: no sprite atlas must be loaded to show them.
@@ -536,27 +554,33 @@ function drawShoesAtEntrance(){
   ctx.fillStyle='#49474b';ctx.fillRect(x+3,850,5,2);ctx.fillStyle='#29262a';}
  ctx.restore();
 }
-function drawPlayer(){const t=player.transition;
- if(t){const f=ease(clamp(t.t/0.7,0,1));const x=t.fromX+(t.toX-t.fromX)*f,y=t.fromY+(t.toY-t.fromY)*f;
-   if(t.kind==='enter'){
-      if(f<.44){drawShadow(x,y);drawWalking(x,y,t.face,f<.31,0)}
-      else if(f<.70){
-        // A single crouching figure bends into the seat; never a translucent duplicate.
-        const squash=1-.23*ease((f-.44)/.26);
-        ctx.save();ctx.translate(0,y);ctx.scale(1,squash);ctx.translate(0,-y);
-        drawWalking(x,y,t.face,false,0);ctx.restore();
-      }else {renderRest({id:t.id,type:t.type,x:t.toX,y:t.toY,face:t.face})}
-   }else{
-      if(f<.28){renderRest({id:t.id,type:t.type,x:t.fromX,y:t.fromY,face:t.face})}
-      else if(f<.55){const squash=.77+.23*ease((f-.28)/.27);
-        ctx.save();ctx.translate(0,y);ctx.scale(1,squash);ctx.translate(0,-y);
-        drawWalking(x,y,t.face,false,0);ctx.restore();
-      }else {drawShadow(x,y);drawWalking(x,y,t.face,false,0)}
-   }return;
+function drawPlayer(){
+ const t=player.transition;
+ if(t){
+  // Do NOT interpolate through the sofa, coffee table, bed or bathroom walls.
+  // The avatar fades between a real walkable approach and its furniture pose.
+  const f=ease(clamp(t.t/.55,0,1));
+  if(t.kind==='enter'){
+   if(f<.52){const alpha=1-f/.52;drawShadow(t.fromX,t.fromY);
+    drawWalking(t.fromX,t.fromY,t.exitDir,false,0,alpha);}
+   else {ctx.save();ctx.globalAlpha=(f-.52)/.48;
+    renderRest({id:t.id,type:t.type,x:t.toX,y:t.toY,face:t.face});
+    ctx.restore();}
+  }else if(f<.5){
+   ctx.save();ctx.globalAlpha=1-f/.5;
+   renderRest({id:t.id,type:t.type,x:t.fromX,y:t.fromY,face:t.face});
+   ctx.restore();
+  }else{
+   const alpha=(f-.5)/.5;drawShadow(t.toX,t.toY);
+   drawWalking(t.toX,t.toY,t.exitDir,false,0,alpha);
+  }
+  return;
  }
- if(player.pose){renderRest(player.pose);return}
- drawShadow(player.x,player.y);drawWalking(player.x,player.y,player.dir,player.moving,player.phase);
+ if(player.pose){renderRest(player.pose);return;}
+ drawShadow(player.x,player.y);
+ drawWalking(player.x,player.y,player.dir,player.moving,player.phase);
 }
+
 function actorFilter(x,y){
  // Region-aware illumination: sunlight entering from the balcony, shadow beside furniture,
  // cool night ambient and warm nearby lamps. Respect approved skin/hair palette.
@@ -619,9 +643,13 @@ function tick(ts){const dt=gamePaused?0:clamp((ts-last)/1000||0,0,.041);last=ts;
  if(keyState.has('ArrowDown')||keyState.has('s'))vy++;
  if(!dialogue.hidden||!$('#modal').hidden||!$('#controlsPanel').hidden||gamePaused||player.transition){vx=0;vy=0}
  const mag=Math.hypot(vx,vy);if(player.pose&&mag>.18){stand();vx=vy=0}
- if(player.transition){const t=player.transition;t.t+=dt;player.x=t.fromX+(t.toX-t.fromX)*ease(clamp(t.t/.7,0,1));player.y=t.fromY+(t.toY-t.fromY)*ease(clamp(t.t/.7,0,1));
-   if(t.t>=.7){if(t.kind==='enter'){player.pose={id:t.id,type:t.type,x:t.toX,y:t.toY,exit:t.exit,face:t.face};player.x=t.toX;player.y=t.toY}
-      else{player.x=t.toX;player.y=t.toY;player.dir=t.face}player.transition=null}}
+ if(player.transition){const t=player.transition;t.t+=dt;
+   if(t.t>=.55){if(t.kind==='enter'){
+      player.pose={id:t.id,type:t.type,x:t.toX,y:t.toY,exit:t.exit,face:t.face,exitDir:t.exitDir};
+      player.x=t.toX;player.y=t.toY;
+     }else{player.x=t.toX;player.y=t.toY;player.dir=t.exitDir}
+     player.transition=null;
+   }}
  else if(!player.pose&&mag>.13){const analog=keyState.size>0?1:clamp((mag-.13)/.87,0,1);vx/=mag;vy/=mag;player.moving=true;
    const ax=Math.abs(vx),ay=Math.abs(vy);player.dir=(ax>.33&&ay>.33&&Math.min(ax,ay)/Math.max(ax,ay)>.42)?(vy<0?'up-':'down-')+(vx<0?'left':'right'):(ax>ay?(vx<0?'left':'right'):(vy<0?'up':'down'));
    const speed=18+175*Math.pow(analog,1.32);player.speed=speed;const n=Math.max(1,Math.ceil(speed*dt/3));for(let i=0;i<n;i++){const x=player.x+vx*speed*dt/n,y=player.y+vy*speed*dt/n;
