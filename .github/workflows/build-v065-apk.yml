@@ -5,6 +5,7 @@ on:
     branches:
       - delivery/v0-6-5-apk
     paths:
+      - 'incoming/chunks/**'
       - incoming/ThePianist_v0.6.5_Clean_Editable_Source.zip
   workflow_dispatch:
 
@@ -38,6 +39,12 @@ jobs:
         run: |
           set -euo pipefail
           ARCHIVE="incoming/ThePianist_v0.6.5_Clean_Editable_Source.zip"
+          if [ ! -s "$ARCHIVE" ]; then
+            mkdir -p incoming
+            test "$(find incoming/chunks -maxdepth 1 -type f -name 'part-*.b64' | wc -l)" -eq 24
+            for i in $(seq -w 0 23); do test -s "incoming/chunks/part-$i.b64"; done
+            cat incoming/chunks/part-*.b64 | base64 --decode > "$ARCHIVE"
+          fi
           test -s "$ARCHIVE"
           printf '%s  %s\n' "4e5e8f0044ad5d77850a2c7ae11aaa99775088ba116b9771ee18366a6a90726b" "$ARCHIVE" | sha256sum --check
           unzip -tq "$ARCHIVE"
