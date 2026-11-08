@@ -60,6 +60,7 @@ jobs:
           SERVER_PID=$!
           trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
           node qa/browser-roam.cjs
+          node qa/browser-travel.cjs
       - name: Set up Java
         if: success()
         uses: actions/setup-java@v4
