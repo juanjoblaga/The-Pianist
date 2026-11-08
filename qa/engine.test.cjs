@@ -87,9 +87,9 @@ test('head proportions, sofa lying pose and piano bench alignment',()=>{
  assert(!game.includes("ctx.drawImage(img,80,0,80,112,-38,-79"),
   'Do not rotate an entire upright character sideways for sofa lying');
  const p=config.furniture.piano.sit;
- assert(p.x>=745&&p.x<=760&&p.y>=375&&p.y<=400,
+ assert(p.x>=765&&p.x<=775&&p.y>=375&&p.y<=400,
   'Piano pose should sit on the bench, not in front of it');
- assert(p.x+40>=782&&p.x+40<=810,
+ assert(p.x+40>=800&&p.x+40<=820,
   'Finger tips should reach the existing keybed x=782..795');
  assert(visuals.piano.sit.handTravel<=4,'Hand articulation should be small and natural');
  assert(game.includes('spriteFile.pianoMotion')&&game.includes('Math.floor(time*spec.beatsPerSecond*6)%6'),
@@ -119,4 +119,15 @@ test('v0.5.5 cover matches lighting and shower exit remains reachable',()=>{
  assert(physics.passable(x,y));
  assert(Math.hypot(x-1277,y-711)<56);
  for(let X=x;X>=1042;X-=2)assert(physics.passable(X,y),'Bathroom return blocked: '+X);
+});
+
+test('piano close to keys and formerly invisible bedroom floor open',()=>{
+ const p=config.furniture.piano.sit;
+ assert(p.x>=765&&p.x<=775&&p.y>=375&&p.y<=390);
+ assert(visuals.piano.sit.scale>=.98&&visuals.piano.sit.scale<=1.02);
+ for(const [x,y] of [[905,452],[900,452],[925,467],[910,500],[935,510],[928,638],[975,640]])
+   assert(physics.passable(x,y),'Invisible wall at visible floor tile '+x+','+y);
+ const art=fs.readFileSync(path.resolve(__dirname,'restore-doors.py'),'utf8');
+ assert(art.includes('FRONT_DOOR = [(710,805)')&&art.includes('1024,1536'),
+   'Ghost-door cleanup must work in original image coordinates');
 });

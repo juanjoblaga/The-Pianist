@@ -43,8 +43,8 @@ const solids=[
  [357,54,430,135],[445,52,492,135],[722,50,805,145], // balcony furniture
  [230,13,838,52],                   // rear railing base
  [235,160,579,177],[655,160,832,177],// balcony glass base (only doorway open)
- [864,121,920,450],                 // bedroom dividing wall
- [928,548,960,621],                 // bathroom outside corner, narrow wall
+ [864,121,920,441],                 // bedroom dividing wall
+ [944,548,960,621],                 // bathroom outside corner, narrow wall
  [964,544,1358,568],               // bathroom north wall
  [984,572,1001,624],                // bathroom door frame
  [918,120,1358,153]                // bedroom rear wall/window sill
@@ -74,7 +74,7 @@ const furniture={
  bed:{sit:{x:1103,y:502,face:'down',exit:{x:1103,y:526}},lie:{x:1104,y:289,face:'up',exit:{x:1103,y:526}}},
  balchair:{sit:{x:470,y:149,face:'left',exit:{x:527,y:144}}},
  beanbag:{sit:{x:759,y:149,face:'down',exit:{x:681,y:144}}},
- piano:{sit:{x:751,y:382,face:'right',exit:{x:699,y:420}}},
+ piano:{sit:{x:768,y:381,face:'right',exit:{x:699,y:420}}},
  shower:{shower:{x:1315,y:671,face:'up',exit:{x:1250,y:751}}}
 };
 
