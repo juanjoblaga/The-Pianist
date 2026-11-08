@@ -1,5 +1,5 @@
 (()=>{'use strict';
-// The Pianist v0.5.5 — approved dialogue, portraits, shower, mirror, elevated city environment.
+// The Pianist v0.5.6 — approved dialogue, portraits, shower, mirror, elevated city environment.
 const W=1536,H=899,canvas=document.querySelector('#game'),ctx=canvas.getContext('2d',{alpha:false});
 canvas.width=W;canvas.height=H;ctx.imageSmoothingEnabled=true;
 // Keep only one fully decoded time-of-day scene in memory. A second scene is
@@ -158,7 +158,11 @@ function interact(){
  const obj=nearest();if(!obj){notice('Move closer and face an object');return}
  const id=obj.id==='balchair'?'balcony':obj.id==='kitchen2'?'kitchen':obj.id;
  if(id==='frontdoor'){
-  showDialogue('frontdoor',[{label:'Go to New Islington',action:()=>{try{localStorage.setItem('thepianist.travel.light.v1',lightMode);localStorage.setItem('thepianist.travel.weather.v1',weather)}catch(_){}location.assign('travel.html')}},{label:'Stay',action:()=>{}}]);return;
+  // One-tap travel, rather than an easy-to-miss second dialogue choice.
+  notice(dialogueScript.frontdoor.text);
+  try{localStorage.setItem('thepianist.travel.light.v1',lightMode);
+      localStorage.setItem('thepianist.travel.weather.v1',weather)}catch(_){}
+  window.location.assign('travel.html');return;
  }
  if(id==='piano'){
   showDialogue('piano',[{label:'Play',action:()=>changePose('piano','sit')},{label:'Leave',action:()=>{}}]);return;
@@ -370,11 +374,13 @@ function drawBalconyFence(){
  // Original furniture restored from the selected indoor plate, without
  // repasting the old dark fence backdrop into the clear open gaps.
  ctx.save();ctx.beginPath();
- ctx.ellipse(278,104,52,64,0,0,Math.PI*2); // plant
- ctx.rect(356,76,87,101); // bistro table
- ctx.moveTo(439,88);ctx.lineTo(489,73);ctx.lineTo(509,90);
- ctx.lineTo(524,135);ctx.lineTo(519,174);ctx.lineTo(435,174);ctx.closePath(); // chair
- ctx.ellipse(770,126,59,54,0,0,Math.PI*2); // beanbag
+ ctx.ellipse(283,101,57,77,0,0,Math.PI*2); // full plant and pot
+ ctx.rect(356,57,105,77);ctx.rect(373,124,17,48);ctx.rect(437,122,17,49); // table and legs
+ ctx.moveTo(450,64);ctx.lineTo(494,64);ctx.lineTo(513,89);
+ ctx.lineTo(513,151);ctx.lineTo(500,151);ctx.lineTo(498,171);
+ ctx.lineTo(483,171);ctx.lineTo(479,119);ctx.lineTo(464,119);
+ ctx.lineTo(461,172);ctx.lineTo(449,172);ctx.closePath(); // full chair
+ ctx.ellipse(768,117,66,65,0,0,Math.PI*2); // full beanbag
  ctx.clip();
  const a=files['light_'+lastLight],b=files['light_'+lightMode];
  if(lastLight!==lightMode&&lightAmount<1){drawWorldImage(a);drawWorldImage(b,ease(lightAmount));}
@@ -569,25 +575,8 @@ function drawPianoFrontOcclusion(){
 }
 // When lying on the sofa, move the exact dark cushion from the original sofa
 // into the reclining sprite. We only patch the sofa during that pose.
-let darkSofaSprite=null;
-function recolorRestPillow(img){
- if(darkSofaSprite||!img?.naturalWidth)return darkSofaSprite;
- const cv=document.createElement('canvas');cv.width=img.naturalWidth;cv.height=img.naturalHeight;
- const cx=cv.getContext('2d');cx.drawImage(img,0,0);
- const data=cx.getImageData(0,0,cv.width,cv.height);const d=data.data;
- for(let f=0;f<3;f++)for(let y=58;y<95;y++)for(let x=164;x<238;x++){
-  const i=(y*cv.width+f*240+x)*4;if(d[i+3]<7)continue;
-  const r=d[i],g=d[i+1],b=d[i+2];
-  // Only low-saturation pale fabric; hair/skin remain completely unchanged.
-  if(r>89&&g>85&&b>81&&Math.abs(r-g)<31&&Math.abs(g-b)<33){
-    const lum=(r+g+b)/3,t=Math.max(-15,Math.min(22,(lum-164)*.24));
-    d[i]=Math.round(42+t);d[i+1]=Math.round(45+t);d[i+2]=Math.round(67+t);
-  }
- }
- cx.putImageData(data,0,0);darkSofaSprite=cv;return cv;
-}
-function drawSofaWithoutCushion(){
- if(player.pose?.id!=='sofa'||player.pose.type!=='lie')return;
+// Resting pillow colour is precalculated from the original sprite (WebView-safe).\nfunction drawSofaWithoutCushion(){
+ if(!((player.pose?.id==='sofa'&&player.pose.type==='lie')||(player.transition?.id==='sofa'&&player.transition.type==='lie')))return;
  // Sofa upholstery sampled from the very same painted plate, with its
  // own light-mode palette, covering the formerly visible loose cushion.
  ctx.save();ctx.beginPath();ctx.roundRect(496,226,70,51,6);ctx.clip();
@@ -606,7 +595,7 @@ function drawReclining(p){
   const frame=[0,1,2,1][Math.floor(time*1.35)%4];
   const spec=poseStyles.sofa.lie;
   ctx.save();ctx.filter=actorFilter(p.x,p.y);ctx.imageSmoothingEnabled=false;
-  ctx.drawImage(recolorRestPillow(img)||img,frame*240,0,240,96,p.x-spec.width/2,p.y-spec.height+6,spec.width,spec.height);
+  ctx.drawImage(img,frame*240,0,240,96,p.x-spec.width/2,p.y-spec.height+6,spec.width,spec.height);
   ctx.restore();ctx.imageSmoothingEnabled=true;
   return;
  }
@@ -738,7 +727,7 @@ function lightingOnSprite(){if(lightMode==='night'){
   const dx2=player.x-1248,dy2=player.y-249,near2=clamp(1-Math.hypot(dx2,dy2)/170,0,1);
   const bright=Math.max(near,near2);if(bright>.01)glow(player.x,player.y-55,40,.075*bright);
  }}
-function draw(){if(!ready){ctx.fillStyle='#111720';ctx.fillRect(0,0,W,H);return;}ctx.fillStyle='#111720';ctx.fillRect(0,0,W,H);ctx.save();ctx.translate(0,cameraY);
+function draw(){ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.filter='none';ctx.globalCompositeOperation='source-over';if(!ready){ctx.fillStyle='#111720';ctx.fillRect(0,0,W,H);return;}ctx.fillStyle='#111720';ctx.fillRect(0,0,W,H);ctx.save();ctx.translate(0,cameraY);
  // One world plane extends behind the entire apartment, including the bedroom window.
  drawCourtyard();drawFallingLeaves();outdoorTint();
  // Opaque apartment sections cover the courtyard; true glazing reveals the same world.

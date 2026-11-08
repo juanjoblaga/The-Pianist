@@ -16,7 +16,7 @@ const catalog={
   beanbagSit:'beanbag_clean_v042',
   piano:'piano_play_v045',
   pianoMotion:'piano_motion_v054',
-  sofaRest:'sofa_lie_v053',
+  sofaRest:'sofa_rest_dark_v059',
   duvet:'duvet_foreground'
  },
  atlas:{
