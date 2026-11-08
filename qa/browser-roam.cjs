@@ -35,6 +35,15 @@ const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
    const target=await page.evaluate(({x,y,dir})=>{const q=window.__pianistTest;q.setPlayer(x,y,dir);return {safe:q.passable(x,y),id:q.nearestId()}},{x,y,dir});
    assert(target.safe&&target.id==='sofa','Missing sofa interaction at '+x+','+y);
   }
+  // Circle marked in the phone screenshot: room floor must be walkable.
+  for(const [x,y] of [[905,452],[900,452],[925,467],[910,500],[935,510],[928,638]]){
+    assert(await page.evaluate(([x,y])=>window.__pianistTest.passable(x,y),[x,y]),
+      'Invisible wall on floor '+x+','+y);
+  }
+  await page.evaluate(()=>window.__pianistTest.setPlayer(905,452,'down'));
+  await page.keyboard.down('ArrowDown');await pause(430);await page.keyboard.up('ArrowDown');
+  const clear=await page.evaluate(()=>window.__pianistTest.getState());
+  assert(clear.y>512,'Bedroom/bathroom approach still blocked');
   // Real keyboard movement and diagonal input on the same collision model.
   const start=await page.evaluate(()=>window.__pianistTest.getState());
   await page.keyboard.down('ArrowRight');await pause(220);await page.keyboard.up('ArrowRight');

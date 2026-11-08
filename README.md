@@ -101,3 +101,18 @@ Browser test extended for mobile help menu and multiple sofa approach points. Dr
 - Same approved six-frame playing animation; reposition pianist 11 world pixels toward the keys and bench centre.
 - Shower safely returns to nearby floor at (1250,751), with an uninterrupted walk west toward the bathroom doorway.
 - Preserve all other v0.5.4 visual, interaction, movement, weather, dialogue, sound and Help fixes. Android v0.5.5 / code 24.
+
+## Post-v0.5.5 development preview — piano / door / collision review
+
+- Keep the approved six-frame piano animation; playing avatar now 0.99× and
+  anchored (768,381), so the fingers overlap the painted keys while the body
+  remains on the existing piano bench.
+- Clean the last prominent triangular front door baked into the original
+  indoor JPEGs. Earlier masks were 1536×899 canvas coordinates; the source is
+  1536×1024. Reconstructed threshold preserves the entry mat.
+- Shorten overextended bedroom-wall collider and trim bathroom exterior corner
+  to keep the visibly clear floor traversable, without removing real walls.
+- All five time-of-day exterior images, including their unusual mirrored look,
+  remain unchanged. Existing bed/sofa/shower/control/dialogue fixes preserved.
+- Changes are a source-only draft for visual review. No new Android release
+  version or APK was published at this stage.
