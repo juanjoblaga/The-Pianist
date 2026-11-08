@@ -72,7 +72,7 @@ test('poses and release rendering avoid old unnatural assets',()=>{
  assert.equal(config.furniture.bed.lie.y,289);
  assert.equal(visuals.sofa.sit.scale,visuals.bed.sit.scale,'seating proportions should remain consistent');
  assert(visuals.balchair.sit.scale>=.85&&visuals.beanbag.sit.scale>=.85);
- assert(game.includes('const exit=id===\'shower\'?safeExit({x:1062,y:718})'),'shower must exit clear of walls');
+ assert(game.includes('const exit=id===\'shower\'?safeExit({x:1250,y:751})'),'shower must exit clear of walls');
  assert(!game.includes("const img=files[spriteFile.piano]"),'Do not restore distorted piano arm atlas');
  assert(game.includes("files['bedcover_'+lightMode]"),'Use identical patterned duvet texture');
 });
