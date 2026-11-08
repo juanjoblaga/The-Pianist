@@ -87,9 +87,9 @@ test('head proportions, sofa lying pose and piano bench alignment',()=>{
  assert(!game.includes("ctx.drawImage(img,80,0,80,112,-38,-79"),
   'Do not rotate an entire upright character sideways for sofa lying');
  const p=config.furniture.piano.sit;
- assert(p.x>=765&&p.x<=775&&p.y>=375&&p.y<=400,
+ assert(p.x>=773&&p.x<=780&&p.y>=375&&p.y<=400,
   'Piano pose should sit on the bench, not in front of it');
- assert(p.x+40>=800&&p.x+40<=820,
+ assert(p.x+40>=811&&p.x+40<=823,
   'Finger tips should reach the existing keybed x=782..795');
  assert(visuals.piano.sit.handTravel<=4,'Hand articulation should be small and natural');
  assert(game.includes('spriteFile.pianoMotion')&&game.includes('Math.floor(time*spec.beatsPerSecond*6)%6'),
@@ -123,11 +123,27 @@ test('v0.5.5 cover matches lighting and shower exit remains reachable',()=>{
 
 test('piano close to keys and formerly invisible bedroom floor open',()=>{
  const p=config.furniture.piano.sit;
- assert(p.x>=765&&p.x<=775&&p.y>=375&&p.y<=390);
- assert(visuals.piano.sit.scale>=.98&&visuals.piano.sit.scale<=1.02);
+ assert(p.x>=773&&p.x<=780&&p.y>=375&&p.y<=390);
+ assert(visuals.piano.sit.scale>=1&&visuals.piano.sit.scale<=1.04);
  for(const [x,y] of [[905,452],[900,452],[925,467],[910,500],[935,510],[928,638],[975,640]])
    assert(physics.passable(x,y),'Invisible wall at visible floor tile '+x+','+y);
  const art=fs.readFileSync(path.resolve(__dirname,'restore-doors.py'),'utf8');
  assert(art.includes('FRONT_DOOR = [(710,805)')&&art.includes('1024,1536'),
    'Ghost-door cleanup must work in original image coordinates');
+});
+
+test('translucent day/night balcony and natural piano foreground depth',()=>{
+ const s=game.indexOf('function drawBalconyFence(){');
+ const e=game.indexOf('function drawFourthFloorFacade(){');
+ const fence=game.slice(s,e);
+ assert(s>=0&&e>s);
+ assert(game.includes('ctx.rect(244,45,580,71)'),'Old dark rear fence must be removed');
+ assert(fence.includes("files['light_'+lightMode]"),'Furniture must follow lighting mode');
+ assert(fence.includes('ctx.createRadialGradient'),'Fairy-light glow must survive');
+ assert(fence.includes('ctx.lineTo(825,113)'),'Railing geometry missing');
+ assert(game.includes('drawBase();drawBalconyFence();drawFourthFloorFacade();'));
+ assert(game.includes('drawPlayer();drawPianoFrontOcclusion();'),
+   'Foreground piano must hide shins while leaving hands over the keys');
+ assert.equal(config.furniture.piano.sit.x,777);
+ assert.equal(visuals.piano.sit.scale,1.02);
 });

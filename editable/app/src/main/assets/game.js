@@ -319,6 +319,61 @@ function drawBedroomWindow(){
  ctx.fillRect(x+10,y+9,w*.25,2);
  ctx.restore();
 }
+// A real see-through rear balcony railing with the fairy-light garlands.
+// City/time-of-day background is drawn behind this cutout by drawCourtyard().
+function drawBalconyFence(){
+ ctx.save();ctx.beginPath();ctx.rect(243,43,582,76);ctx.clip();
+ const night=lightMode==='night';
+ const opacity=night?.73:lightMode==='sunset'?.61:.48;
+ ctx.strokeStyle='rgba(31,36,43,'+opacity+')';
+ ctx.lineCap='round';ctx.lineWidth=3;
+ ctx.beginPath();ctx.moveTo(243,48);ctx.lineTo(825,48);
+ ctx.moveTo(243,113);ctx.lineTo(825,113);ctx.stroke();
+ ctx.lineWidth=2.4;
+ for(let x=252;x<=821;x+=32){
+  ctx.beginPath();ctx.moveTo(x,47);ctx.lineTo(x,111);ctx.stroke();
+  ctx.fillStyle='rgba(38,39,44,'+(opacity*.86)+')';
+  ctx.beginPath();ctx.arc(x,51,3.1,0,6.283);ctx.fill();
+ }
+ ctx.strokeStyle='rgba(197,185,163,'+(night?.35:.57)+')';
+ ctx.lineWidth=1.15;ctx.beginPath();ctx.moveTo(243,45);ctx.lineTo(825,45);ctx.stroke();
+ // Original-style hanging fairy lights; faint daytime reflections,
+ // warm illuminated bulbs and subtle glow at night.
+ const lights=[[256,48],[316,65],[365,50],[418,78],[473,59],[524,69],[576,55],[629,90],[684,65],[735,78],[800,53]];
+ ctx.strokeStyle='rgba(34,33,36,.8)';ctx.lineWidth=1.45;
+ ctx.beginPath();ctx.moveTo(lights[0][0],lights[0][1]);
+ for(let i=1;i<lights.length;i++){
+  const [x,y]=lights[i],prev=lights[i-1];
+  ctx.quadraticCurveTo((prev[0]+x)/2,(prev[1]+y)/2+8,x,y);
+ }ctx.stroke();
+ for(const [x,y] of lights){
+  const r=night?3.2:2.1;
+  ctx.strokeStyle='rgba(34,32,33,.83)';ctx.lineWidth=1.9;
+  ctx.beginPath();ctx.moveTo(x,y-3);ctx.lineTo(x,y+6);ctx.stroke();
+  ctx.fillStyle=night?'rgba(255,211,128,.94)':lightMode==='sunset'?'rgba(250,204,128,.72)':'rgba(244,215,153,.43)';
+  ctx.beginPath();ctx.ellipse(x,y+7,r,r*1.15,0,0,6.283);ctx.fill();
+  if(night){
+   const glow=ctx.createRadialGradient(x,y+7,0,x,y+7,15);
+   glow.addColorStop(0,'rgba(255,193,108,.35)');
+   glow.addColorStop(1,'rgba(255,193,108,0)');
+   ctx.fillStyle=glow;ctx.fillRect(x-15,y-8,30,30);
+  }
+ }
+ ctx.restore();
+ // Original furniture restored from the selected indoor plate, without
+ // repasting the old dark fence backdrop into the clear open gaps.
+ ctx.save();ctx.beginPath();
+ ctx.rect(235,42,102,114); // plant
+ ctx.rect(356,76,87,101); // bistro table
+ ctx.moveTo(439,88);ctx.lineTo(489,73);ctx.lineTo(509,90);
+ ctx.lineTo(524,135);ctx.lineTo(519,174);ctx.lineTo(435,174);ctx.closePath(); // chair
+ ctx.ellipse(770,126,59,54,0,0,Math.PI*2); // beanbag
+ ctx.clip();
+ const a=files['light_'+lastLight],b=files['light_'+lightMode];
+ if(lastLight!==lightMode&&lightAmount<1){drawWorldImage(a);drawWorldImage(b,ease(lightAmount));}
+ else drawWorldImage(b);
+ ctx.restore();
+}
 function drawFourthFloorFacade(){
  // Short, solid cutaway façade below this fourth-floor slab. No ground-level scene
  // or geometry from a different apartment is revealed beneath the entrance.
@@ -362,6 +417,9 @@ function drawBase(){
  // The old isolated balcony view had a thick nearly-black slab above its rear rail.
  // Reveal the same courtyard plate behind it; preserve both end posts and the railing below.
  ctx.moveTo(235,16);ctx.lineTo(829,16);ctx.lineTo(829,43);ctx.lineTo(235,43);ctx.closePath();
+ // Remove the old opaque night-only balcony panel. The existing courtyard
+ // is visible through transparent wrought-iron bars at every time of day.
+ ctx.rect(244,45,580,71);
  // A subtracted bedroom window rather than painted scenery over a solid wall.
  const {x:wx,y:wy,w:ww,h:wh}=windowFrame;
  ctx.moveTo(wx,wy);ctx.lineTo(wx,wy+wh);ctx.lineTo(wx+ww,wy+wh);
@@ -489,6 +547,18 @@ function drawPianoPlaying(p){
  ctx.save();ctx.imageSmoothingEnabled=false;ctx.filter=actorFilter(p.x,p.y);
  ctx.drawImage(img,frame*128,0,128,170,p.x-w/2,p.y-h,w,h);
  ctx.restore();ctx.imageSmoothingEnabled=true;
+}
+// The animated pianist's lower legs are behind the actual piano front.
+// Fingers remain over the keyboard while shins and shoes disappear beneath.
+function drawPianoFrontOcclusion(){
+ if(player.pose?.id!=='piano'||player.pose.type!=='sit')return;
+ ctx.save();ctx.beginPath();
+ ctx.moveTo(781,330);ctx.lineTo(864,330);
+ ctx.lineTo(864,452);ctx.lineTo(780,452);ctx.closePath();ctx.clip();
+ const a=files['light_'+lastLight],b=files['light_'+lightMode];
+ if(lastLight!==lightMode&&lightAmount<1){drawWorldImage(a);drawWorldImage(b,ease(lightAmount));}
+ else drawWorldImage(b);
+ ctx.restore();
 }
 function drawReclining(p){
  if(p.id==='sofa'){
@@ -636,13 +706,13 @@ function draw(){if(!ready){ctx.fillStyle='#111720';ctx.fillRect(0,0,W,H);return;
  // One world plane extends behind the entire apartment, including the bedroom window.
  drawCourtyard();drawFallingLeaves();outdoorTint();
  // Opaque apartment sections cover the courtyard; true glazing reveals the same world.
- drawBase();drawFourthFloorFacade();drawBathroomMirror();drawBedroomWindow();drawBalconyDoor();drawPhysicalDoors();
+ drawBase();drawBalconyFence();drawFourthFloorFacade();drawBathroomMirror();drawBedroomWindow();drawBalconyDoor();drawPhysicalDoors();
  // Balcony reveal comes from gentle camera look-up; never paste a band over the flat.
  ambientDust();drawWeather();updateAmbient();
  timeLight();
  // No duplicate door leaf over the original artwork.
- drawShoesAtEntrance();drawPlayer();drawBalconyGlassInFront();lightingOnSprite();
- // The railing is painted once in the base scene. Its collider—not a second image slab—enforces depth.
+ drawShoesAtEntrance();drawPlayer();drawPianoFrontOcclusion();drawBalconyGlassInFront();lightingOnSprite();
+ // The new translucent rear fence keeps its solid balcony collision rail.
 
  if(stormFlash>0){ctx.fillStyle=`rgba(211,224,255,${stormFlash*.43})`;ctx.fillRect(230,-350,1130,1330)}
  ctx.restore();}

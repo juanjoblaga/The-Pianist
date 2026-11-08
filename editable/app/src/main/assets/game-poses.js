@@ -16,7 +16,7 @@ const poses={
   },
   balchair:{sit:{visual:'sit',scale:.88}},
   beanbag:{sit:{visual:'sit',scale:.88,beanbag:true}},
-  piano:{sit:{visual:'piano',scale:.99,handTravel:3,beatsPerSecond:1.35}},
+  piano:{sit:{visual:'piano',scale:1.02,handTravel:3,beatsPerSecond:1.35}},
   shower:{shower:{visual:'mosaic'}}
 };
 root.ThePianistPoses=poses;
