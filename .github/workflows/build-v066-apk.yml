@@ -1,0 +1,183 @@
+name: The Pianist v0.6.6 — seamless atmosphere and fence fix
+
+on:
+  push:
+    branches:
+      - delivery/v0-6-6-atmosphere
+    paths:
+      - 'release/**'
+      - '.github/workflows/build-v066-apk.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-signed-candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      # GitHub's Ubuntu image already contains Android SDK; the legacy
+      # setup-android@v3 action fails trying to install removed 'tools'.
+      - name: Verify preinstalled Android SDK
+        run: |
+          test -n "${ANDROID_HOME:-}"
+          test -d "$ANDROID_HOME/build-tools"
+          ls "$ANDROID_HOME/build-tools"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Validate uploaded source and version identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          ARCHIVE="incoming/ThePianist_v0.6.5_Clean_Editable_Source.zip"
+          if [ ! -s "$ARCHIVE" ]; then
+            mkdir -p incoming
+            test "$(find incoming/chunks -maxdepth 1 -type f -name 'part-*.b64' | wc -l)" -eq 24
+            for i in $(seq -w 0 23); do test -s "incoming/chunks/part-$i.b64"; done
+            cat incoming/chunks/part-*.b64 | base64 --decode > "$ARCHIVE"
+          fi
+          test -s "$ARCHIVE"
+          printf '%s  %s\n' "4e5e8f0044ad5d77850a2c7ae11aaa99775088ba116b9771ee18366a6a90726b" "$ARCHIVE" | sha256sum --check
+          unzip -tq "$ARCHIVE"
+          mkdir -p source
+          unzip -q "$ARCHIVE" -d source
+          test -f source/app/src/main/assets/station-scene.js
+          test -f source/app/src/main/assets/station_world.png
+          test -f source/app/src/main/assets/station_obj_tram.png
+          test -f source/app/src/main/assets/VERSION.json
+          python -m pip install --quiet pillow
+          python source/qa/verify_integrity.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('source/app/src/main/assets')
+          record=json.loads(Path('source/qa/asset_prune_manifest.json').read_text())
+          assert len(record['unreferenced_removed'])==30, 'Unexpected asset-prune inventory'
+          assert all(not (root/x['name']).exists() for x in record['unreferenced_removed']), 'Obsolete assets still packaged'
+          active=['station_world.png','station_obj_tram.png','station_clouds_storm.png','piano_motion_v054.png','sofa_rest_dark_v059.png',
+                  'walk_cycle_v045.png','portrait_thoughtful.png','portrait_gentle.png','duvet_foreground.png']
+          assert all((root/x).is_file() for x in active), 'Current approved asset missing'
+          print('Release asset-prune gate: 30 historical images removed; active images retained')
+          PY
+          find source/app/src/main/assets -name '*.js' -print0 | xargs -0 -n1 node --check
+          test "$(find source -type f \( -name '*.jks' -o -name '*.keystore' -o -name '*.p12' \) | wc -l)" -eq 0
+
+
+      - name: Apply and verify v0.6.6 atmosphere and platform collision fixes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet numpy pillow
+          python release/polish_v066.py source
+          python source/qa/verify_integrity.py
+          find source/app/src/main/assets -type f -name '*.js' -print0 | xargs -0 -n1 node --check
+          python - <<'PY'
+          import numpy as np
+          from PIL import Image
+          from pathlib import Path
+          root=Path('source/app/src/main/assets')
+          for name in ('sunny','cloudy','windy','foggy','rainy','storm','snowy'):
+              a=np.asarray(Image.open(root/f'station_clouds_{name}.png')).astype('int16')
+              assert abs(a[:,0]-a[:,-1]).max()<=1, 'Cloud seam: '+name
+          a=np.asarray(Image.open(root/'station_weather_wet.png'))[:,:,3]
+          assert a.max()<65, 'Puddle alpha or rectangular region too harsh'
+          travel=(root/'travel.js').read_text()
+          assert 'y<692' in travel and 'y<618' not in travel
+          assert (root/'station_world.png').is_file()
+          print('v0.6.6 seam, alpha, rear fence and background-preservation gates passed')
+          PY
+
+      - name: Restore original Android signing baseline and overlay current game
+        shell: bash
+        run: |
+          set -euo pipefail
+          unzip -tq ThePianistAndroid-GitHubBuild-v0.4.5.zip
+          mkdir -p build-project
+          unzip -q ThePianistAndroid-GitHubBuild-v0.4.5.zip -d build-project
+          test -f build-project/app/pianist-prototype-signing.jks
+          # This full source replaces old game assets, not the pinned signing config.
+          rsync -a --delete source/app/src/main/assets/ build-project/app/src/main/assets/
+          rsync -a source/app/src/main/java/ build-project/app/src/main/java/
+          # Delete old -v4 launcher variants to avoid resource-name collisions.
+          rsync -a --delete source/app/src/main/res/ build-project/app/src/main/res/
+          cp source/app/src/main/AndroidManifest.xml build-project/app/src/main/AndroidManifest.xml
+          # The reconstructed source is a preview; mark the packaged Android candidate accurately.
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('build-project/app/src/main/assets/VERSION.json')
+          data=json.loads(p.read_text())
+          assert data['versionName']=='0.6.6' and data['versionCode']==35
+          data['status']='Signed Android phone-test candidate; physical device testing pending'
+          p.write_text(json.dumps(data, indent=2))
+          PY
+          python - <<'PY'
+          import json, re
+          from pathlib import Path
+          meta = json.loads(Path('source/VERSION.json').read_text())
+          assert meta['versionName'] == '0.6.6' and meta['versionCode'] == 35
+          gradle = Path('build-project/app/build.gradle')
+          original = gradle.read_text()
+          assert re.search(r"applicationId\s+['\"]com\.thepianist\.game['\"]", original), 'Unexpected applicationId'
+          code = re.search(r'\bversionCode\s+(\d+)', original)
+          assert code and int(code.group(1)) < 35, 'Invalid baseline versionCode'
+          assert re.search(r'\bversionName\s+[\'\"][^\'\"]+[\'\"]', original), 'Missing baseline versionName'
+          replacement = re.sub(r'\bversionCode\s+\d+', 'versionCode 35', original, count=1)
+          replacement = re.sub(r'\bversionName\s+[\'\"][^\'\"]+[\'\"]', "versionName '0.6.6'", replacement, count=1)
+          gradle.write_text(replacement)
+          print('Verified original application ID and signing baseline; set v0.6.6/code35')
+          PY
+
+      - name: Build Android APK using original signing baseline
+        working-directory: build-project
+        run: gradle assembleDebug --no-daemon --stacktrace
+
+      - name: Verify APK version and matching signing certificate
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          APK=$(find build-project/app/build/outputs/apk -type f -name 'app-debug.apk' | head -n 1)
+          test -s "$APK"
+          cp "$APK" out/ThePianist-v0.6.6.apk
+          APKSIGNER=$(find "$ANDROID_HOME/build-tools" -type f -name apksigner | sort -V | tail -n 1)
+          test -x "$APKSIGNER"
+          "$APKSIGNER" verify --verbose --print-certs out/ThePianist-v0.6.6.apk | tee out/signature-details.txt
+          python - <<'PY'
+          import re
+          from pathlib import Path
+          data=Path('out/signature-details.txt').read_text()
+          found=re.search(r'(?:V2 Signer|Signer #1): certificate SHA-256 digest:\s*([0-9a-fA-F]+)',data)
+          expected='be1e4567fe575d944364ac4d24274558d494d7bd5309fcf2bdd67d5b06af8176'
+          assert found and found.group(1).lower()==expected, 'APK signing certificate differs from v0.6.4; reject candidate'
+          print('Signature matches v0.6.4 reference certificate')
+          PY
+          AAPT=$(find "$ANDROID_HOME/build-tools" -type f -name aapt | sort -V | tail -n 1)
+          "$AAPT" dump badging out/ThePianist-v0.6.6.apk | grep -m1 'package:' | tee out/manifest-identity.txt
+          grep -q "name='com.thepianist.game' versionCode='35' versionName='0.6.6'" out/manifest-identity.txt
+          sha256sum out/ThePianist-v0.6.6.apk > out/apk.sha256
+
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: ThePianist-v0.6.6-signed-APK
+          path: |
+            out/ThePianist-v0.6.6.apk
+            out/apk.sha256
+          if-no-files-found: error
+          retention-days: 45
