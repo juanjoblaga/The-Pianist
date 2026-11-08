@@ -128,7 +128,7 @@ test('piano close to keys and formerly invisible bedroom floor open',()=>{
  for(const [x,y] of [[905,452],[900,452],[925,467],[910,500],[935,510],[928,638],[975,640]])
    assert(physics.passable(x,y),'Invisible wall at visible floor tile '+x+','+y);
  const art=fs.readFileSync(path.resolve(__dirname,'restore-doors.py'),'utf8');
- assert(art.includes('FRONT_DOOR = [(710,805)')&&art.includes('1024,1536'),
+ assert(art.includes('FRONT=[(710,805)')&&art.includes('(1024,1536)'),
    'Ghost-door cleanup must work in original image coordinates');
 });
 
