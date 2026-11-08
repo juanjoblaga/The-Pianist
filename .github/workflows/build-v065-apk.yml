@@ -88,7 +88,8 @@ jobs:
           # This full source replaces old game assets, not the pinned signing config.
           rsync -a --delete source/app/src/main/assets/ build-project/app/src/main/assets/
           rsync -a source/app/src/main/java/ build-project/app/src/main/java/
-          rsync -a source/app/src/main/res/ build-project/app/src/main/res/
+          # Delete old -v4 launcher variants to avoid resource-name collisions.
+          rsync -a --delete source/app/src/main/res/ build-project/app/src/main/res/
           cp source/app/src/main/AndroidManifest.xml build-project/app/src/main/AndroidManifest.xml
           python - <<'PY'
           import json, re
