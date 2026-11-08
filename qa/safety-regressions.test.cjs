@@ -28,3 +28,13 @@ test('door restoration repairs full triangular edge',()=>{
  assert(py.includes('(821,925)'));
  assert(py.includes('Repaired physical entry door'));
 });
+
+test('balcony cutouts are generated for all five day/night plates',()=>{
+ const art=require(path.join(assets,'game-assets.js'));
+ assert(art.modeLayers.includes('balconyprops'));
+ for(const mode of art.modes){
+  const png=fs.readFileSync(path.join(assets,'balconyprops_'+mode+'.png'));
+  assert(png.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10])));
+  assert(png.readUInt32BE(16)===595&&png.readUInt32BE(20)===145);
+ }
+});
