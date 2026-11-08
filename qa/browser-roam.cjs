@@ -162,6 +162,22 @@ const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
    const target=await page.evaluate(({x,y,dir})=>{window.__pianistTest.setPlayer(x,y,dir);return window.__pianistTest.nearestId()},{x,y,dir});
    assert.equal(target,id,'Wrong restroom target '+id);
   }
+  // Balcony fence must show different colour through the same clear bar gap.
+  await page.evaluate(()=>window.__pianistTest.setPlayer(730,570,'down'));
+  await page.evaluate(()=>window.__pianistTest.setLighting('morning'));
+  await page.waitForFunction(()=>window.__pianistTest.getState().lightMode==='morning');
+  await pause(2400);
+  await page.screenshot({path:imageDir+'/13-balcony-transparent-day.png'});
+  const railDay=await page.evaluate(()=>Array.from(
+    document.querySelector('#game').getContext('2d').getImageData(603,81,1,1).data));
+  await page.evaluate(()=>window.__pianistTest.setLighting('night'));
+  await page.waitForFunction(()=>window.__pianistTest.getState().lightMode==='night');
+  await pause(2400);
+  await page.screenshot({path:imageDir+'/14-balcony-fairy-lights-night.png'});
+  const railNight=await page.evaluate(()=>Array.from(
+    document.querySelector('#game').getContext('2d').getImageData(603,81,1,1).data));
+  assert(railDay.slice(0,3).reduce((n,v,i)=>n+Math.abs(v-railNight[i]),0)>18,
+    'Courtyard behind fence must change with daylight');
   // Daylight must visibly differ from the previously baked-in night scene.
   await page.evaluate(()=>window.__pianistTest.setPlayer(730,570,'down'));
   await page.evaluate(()=>window.__pianistTest.setLighting('night'));

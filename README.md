@@ -116,3 +116,16 @@ Browser test extended for mobile help menu and multiple sofa approach points. Dr
   remain unchanged. Existing bed/sofa/shower/control/dialogue fixes preserved.
 - Changes are a source-only draft for visual review. No new Android release
   version or APK was published at this stage.
+
+## Translucent railing and piano depth — source-only visual draft
+
+- The same approved six-frame pianist is moved slightly closer (x777)
+  at 1.02x scale; an art-matched piano foreground now occludes the
+  shins and shoes without covering the hands.
+- Remove the old opaque dark balcony backdrop, keeping railing bars,
+  transparent spaces and warm hanging fairy lights. The actual courtyard
+  is visible behind the rail through all five day/night lighting modes.
+- Preserve the original balcony furniture, sofa and bed poses, dialog,
+  shower, weather, mirror/door geometry and the existing mirrored exterior.
+- New browser screenshots compare daylight and night through the fence.
+- No version bump or APK requested — keep as draft pending visual approval.
