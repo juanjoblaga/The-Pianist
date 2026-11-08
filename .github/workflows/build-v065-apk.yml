@@ -127,7 +127,7 @@ jobs:
           import re
           from pathlib import Path
           data=Path('out/signature-details.txt').read_text()
-          found=re.search(r'Signer #1 certificate SHA-256 digest:\s*([0-9a-fA-F]+)',data)
+          found=re.search(r'(?:V2 Signer|Signer #1): certificate SHA-256 digest:\s*([0-9a-fA-F]+)',data)
           expected='be1e4567fe575d944364ac4d24274558d494d7bd5309fcf2bdd67d5b06af8176'
           assert found and found.group(1).lower()==expected, 'APK signing certificate differs from v0.6.4; reject candidate'
           print('Signature matches v0.6.4 reference certificate')
