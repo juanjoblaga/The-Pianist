@@ -148,3 +148,6 @@ Browser test extended for mobile help menu and multiple sofa approach points. Dr
 - All approved piano, sofa, bed, shower, weather, authored dialogue,
   joystick, Travel Hub and map functionality are retained.
 - Android versionName 0.5.6 / versionCode 25. Draft pending phone acceptance.
+
+### Balcony object foreground
+Generated alpha cutouts isolate the approved balcony plant, chair, table and beanbag from the old dark night background. This removes black oval silhouettes while keeping the translucent railing and dynamic light.

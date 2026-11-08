@@ -12,8 +12,8 @@ test('Android-safe sofa pose cannot taint canvas or leave persistent alpha',()=>
  assert(fs.existsSync(path.join(assets,'sofa_rest_dark_v059.png')));
 });
 test('complete balcony furniture and matched railing collision',()=>{
- assert(game.includes('ctx.ellipse(768,117,66,65'));
- assert(game.includes('ctx.rect(356,57,105,77)'));
+ assert(game.includes("files['balconyprops_'+lightMode]"));
+ assert(fs.existsSync(path.join(assets,'balconyprops_afternoon.png')));
  assert(!phys.passable(590,115));
  assert(phys.passable(590,132));
 });

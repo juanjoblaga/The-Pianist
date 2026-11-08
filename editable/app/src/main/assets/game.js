@@ -371,20 +371,16 @@ function drawBalconyFence(){
   }
  }
  ctx.restore();
- // Original furniture restored from the selected indoor plate, without
- // repasting the old dark fence backdrop into the clear open gaps.
- ctx.save();ctx.beginPath();
- ctx.ellipse(283,101,57,77,0,0,Math.PI*2); // full plant and pot
- ctx.rect(356,57,105,77);ctx.rect(373,124,17,48);ctx.rect(437,122,17,49); // table and legs
- ctx.moveTo(450,64);ctx.lineTo(494,64);ctx.lineTo(513,89);
- ctx.lineTo(513,151);ctx.lineTo(500,151);ctx.lineTo(498,171);
- ctx.lineTo(483,171);ctx.lineTo(479,119);ctx.lineTo(464,119);
- ctx.lineTo(461,172);ctx.lineTo(449,172);ctx.closePath(); // full chair
- ctx.ellipse(768,117,66,65,0,0,Math.PI*2); // full beanbag
- ctx.clip();
- const a=files['light_'+lastLight],b=files['light_'+lightMode];
- if(lastLight!==lightMode&&lightAmount<1){drawWorldImage(a);drawWorldImage(b,ease(lightAmount));}
- else drawWorldImage(b);
+ // Draw only balcony-furniture alpha cutouts made from original art.
+ ctx.save();
+ const prev=files['balconyprops_'+lastLight],cur=files['balconyprops_'+lightMode];
+ if(lastLight!==lightMode&&lightAmount<1&&prev?.complete&&prev.naturalWidth){
+  ctx.globalAlpha=1-ease(lightAmount);ctx.drawImage(prev,235,33);
+ }
+ if(cur?.complete&&cur.naturalWidth){
+  ctx.globalAlpha=(lastLight!==lightMode&&lightAmount<1)?ease(lightAmount):1;
+  ctx.drawImage(cur,235,33);
+ }
  ctx.restore();
 }
 function drawFourthFloorFacade(){

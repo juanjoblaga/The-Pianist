@@ -138,7 +138,7 @@ test('translucent day/night balcony and natural piano foreground depth',()=>{
  const fence=game.slice(s,e);
  assert(s>=0&&e>s);
  assert(game.includes('ctx.rect(244,45,580,71)'),'Old dark rear fence must be removed');
- assert(fence.includes("files['light_'+lightMode]"),'Furniture must follow lighting mode');
+ assert(fence.includes("files['balconyprops_'+lightMode]"),'Furniture must follow lighting mode');
  assert(fence.includes('ctx.createRadialGradient'),'Fairy-light glow must survive');
  assert(fence.includes('ctx.lineTo(825,113)'),'Railing geometry missing');
  assert(game.includes('drawBase();drawSofaWithoutCushion();drawBalconyFence();drawFourthFloorFacade();'));
