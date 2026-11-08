@@ -363,7 +363,7 @@ function drawBalconyFence(){
  // Original furniture restored from the selected indoor plate, without
  // repasting the old dark fence backdrop into the clear open gaps.
  ctx.save();ctx.beginPath();
- ctx.rect(235,42,102,114); // plant
+ ctx.ellipse(278,104,52,64,0,0,Math.PI*2); // plant
  ctx.rect(356,76,87,101); // bistro table
  ctx.moveTo(439,88);ctx.lineTo(489,73);ctx.lineTo(509,90);
  ctx.lineTo(524,135);ctx.lineTo(519,174);ctx.lineTo(435,174);ctx.closePath(); // chair
