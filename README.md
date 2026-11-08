@@ -94,3 +94,10 @@ Please review screenshots and test on a phone before merging this stacked draft 
 - Kept all 5 time-of-day exteriors, original dialogue, 13 interactions, saved control settings and Android app identity. Version 0.5.4 / code 23.
 
 Browser test extended for mobile help menu and multiple sofa approach points. Draft pending physical phone approval.
+
+## v0.5.5 — user phone feedback (draft)
+
+- Patterned duvet reaches the character's neck using the *same* original teal-and-white diamond texture, blended seamlessly into the existing lower bedspread in all five lighting modes. No floating extra fabric.
+- Same approved six-frame playing animation; reposition pianist 11 world pixels toward the keys and bench centre.
+- Shower safely returns to nearby floor at (1250,751), with an uninterrupted walk west toward the bathroom doorway.
+- Preserve all other v0.5.4 visual, interaction, movement, weather, dialogue, sound and Help fixes. Android v0.5.5 / code 24.

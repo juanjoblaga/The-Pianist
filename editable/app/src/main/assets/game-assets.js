@@ -6,7 +6,7 @@
 'use strict';
 const catalog={
  modes:['sunrise','morning','afternoon','sunset','night'],
- modeLayers:['world','light'],
+ modeLayers:['world','light','bedcover'],
  weather:['sunny','cloudy','foggy','rainy','snowy','storm','windy'],
  sprites:{
   walk:'walk_cycle_v045',
