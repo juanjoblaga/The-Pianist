@@ -99,7 +99,7 @@ jobs:
           data=json.loads(p.read_text())
           assert data['versionName']=='0.6.5' and data['versionCode']==34
           data['status']='Signed Android phone-test candidate; physical device testing pending'
-          p.write_text(json.dumps(data, indent=2)+'\\n')
+          p.write_text(json.dumps(data, indent=2))
           PY
           python - <<'PY'
           import json, re
