@@ -123,7 +123,7 @@ test('v0.5.5 cover matches lighting and shower exit remains reachable',()=>{
 
 test('piano close to keys and formerly invisible bedroom floor open',()=>{
  const p=config.furniture.piano.sit;
- assert(p.x>=765&&p.x<=775&&p.y>=375&&p.y<=390);
+ assert(p.x>=773&&p.x<=780&&p.y>=375&&p.y<=390);
  assert(visuals.piano.sit.scale>=1&&visuals.piano.sit.scale<=1.04);
  for(const [x,y] of [[905,452],[900,452],[925,467],[910,500],[935,510],[928,638],[975,640]])
    assert(physics.passable(x,y),'Invisible wall at visible floor tile '+x+','+y);
