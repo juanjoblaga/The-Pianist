@@ -91,6 +91,16 @@ jobs:
           # Delete old -v4 launcher variants to avoid resource-name collisions.
           rsync -a --delete source/app/src/main/res/ build-project/app/src/main/res/
           cp source/app/src/main/AndroidManifest.xml build-project/app/src/main/AndroidManifest.xml
+          # The reconstructed source is a preview; mark the packaged Android candidate accurately.
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('build-project/app/src/main/assets/VERSION.json')
+          data=json.loads(p.read_text())
+          assert data['versionName']=='0.6.5' and data['versionCode']==34
+          data['status']='Signed Android phone-test candidate; physical device testing pending'
+          p.write_text(json.dumps(data, indent=2)+'\\n')
+          PY
           python - <<'PY'
           import json, re
           from pathlib import Path
