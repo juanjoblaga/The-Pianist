@@ -12,7 +12,7 @@ import sys
 assets=Path(sys.argv[1]) if len(sys.argv)>1 else Path('build-project/app/src/main/assets')
 FRONT=[(710,805),(728,799),(744,810),(768,839),(799,870),(816,898),
        (821,925),(804,930),(795,942),(708,942)]
-RIGHT=[(831,836),(850,835),(862,855),(864,879),(833,879)]
+RIGHT=[(847,825),(885,826),(882,868),(846,874)]
 BATH=[(972,736),(1020,735),(1020,832),(972,832)]
 def repair(image,polygon,kind):
     h,w=image.shape[:2]

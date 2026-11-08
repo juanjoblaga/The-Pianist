@@ -38,3 +38,8 @@ test('balcony cutouts are generated for all five day/night plates',()=>{
   assert(png.readUInt32BE(16)===595&&png.readUInt32BE(20)===145);
  }
 });
+
+test('entrance bright door-tip cleanup covers last right-wall triangle',()=>{
+ const py=fs.readFileSync(path.join(__dirname,'restore-doors.py'),'utf8');
+ assert(py.includes('RIGHT=[(847,825),(885,826),(882,868),(846,874)]'));
+});
