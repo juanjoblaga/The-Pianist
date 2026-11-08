@@ -62,6 +62,10 @@ const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
    assert(state.dialogueOpen,'Dialogue did not open for '+id);
    assert(state.dialogueText.length>0,'Dialogue text missing for '+id);
   }
+  // Verify a real colour change in the sheet region when patterned duvet
+  // is drawn, while keeping the previously approved face and pillows.
+  const coverBefore=await page.evaluate(()=>Array.from(document.querySelector('#game').getContext('2d').getImageData(1040,310,125,38).data));
+  assert((await page.evaluate(()=>window.__pianistTest.loadedImages())).includes('bedcover_afternoon'));
   // Bed: player remains visible above the cover, then safely stands on floor.
   await page.evaluate(()=>window.__pianistTest.setPlayer(1103,525,'up'));
   await page.evaluate(()=>window.__pianistTest.interact());
@@ -69,6 +73,9 @@ const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
   await pause(900);
   let pose=await page.evaluate(()=>window.__pianistTest.getState().pose);
   assert(pose&&pose.id==='bed'&&pose.type==='lie','Bed lying pose did not activate');
+  const coverAfter=await page.evaluate(()=>Array.from(document.querySelector('#game').getContext('2d').getImageData(1040,310,125,38).data));
+  const changed=coverAfter.reduce((n,v,i)=>n+(Math.abs(v-coverBefore[i])>20?1:0),0);
+  assert(changed>500,'Patterned duvet must cover the original plain sheet: '+changed);
   await page.screenshot({path:imageDir+'/02-bed-lying.png'});
   await page.evaluate(()=>window.__pianistTest.interact());await pause(900);
   let standing=await page.evaluate(()=>window.__pianistTest.getState());
@@ -136,11 +143,11 @@ const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
   await pause(850);
   assert(await page.evaluate(()=>window.__pianistTest.passable(window.__pianistTest.getState().x,window.__pianistTest.getState().y)),'Stuck after shower');
   const showerExit=await page.evaluate(()=>window.__pianistTest.getState());
-  assert(Math.hypot(showerExit.x-1062,showerExit.y-718)<2,'Shower exit must be at clear bathroom floor');
+  assert(Math.hypot(showerExit.x-1250,showerExit.y-751)<2,'Shower exit must be at clear bathroom floor');
   await page.evaluate(()=>{document.querySelector('#dialogue').hidden=true;});
   await page.keyboard.down('ArrowLeft');await pause(950);await page.keyboard.up('ArrowLeft');
   const movedOut=await page.evaluate(()=>window.__pianistTest.getState());
-  assert(movedOut.x<930,'Avatar cannot navigate back into living room after shower');
+  assert(movedOut.x<1120,'Avatar cannot navigate back into living room after shower');
   const fixtures=[['mirror',1178,695,'up'],['toilet',1207,603,'down'],['shower',1250,590,'right']];
   for(const [id,x,y,dir] of fixtures){
    const target=await page.evaluate(({x,y,dir})=>{window.__pianistTest.setPlayer(x,y,dir);return window.__pianistTest.nearestId()},{x,y,dir});

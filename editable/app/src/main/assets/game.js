@@ -1,5 +1,5 @@
 (()=>{'use strict';
-// The Pianist v0.5.4 — approved dialogue, portraits, shower, mirror, elevated city environment.
+// The Pianist v0.5.5 — approved dialogue, portraits, shower, mirror, elevated city environment.
 const W=1536,H=899,canvas=document.querySelector('#game'),ctx=canvas.getContext('2d',{alpha:false});
 canvas.width=W;canvas.height=H;ctx.imageSmoothingEnabled=true;
 // Keep only one fully decoded time-of-day scene in memory. A second scene is
@@ -124,7 +124,7 @@ function changePose(id,type){
  const data=furniture[id]?.[type];if(!data)return;
  // Preserve the exact approach where the player could actually stand.
  // The shower has a dedicated clear exit by the bathroom door, not on a wall.
- const exit=id==='shower'?safeExit({x:1062,y:718}):
+ const exit=id==='shower'?safeExit({x:1250,y:751}):
    (passable(player.x,player.y)?{x:player.x,y:player.y}:safeExit(data.exit));
  player.transition={kind:'enter',id,type,t:0,fromX:player.x,fromY:player.y,
    toX:data.x,toY:data.y,exit,face:data.face,exitDir:player.dir};
@@ -513,15 +513,19 @@ function drawReclining(p){
   const w=spec.headWidth,h=spec.headHeight;
   ctx.save();ctx.filter=actorFilter(p.x,p.y);ctx.imageSmoothingEnabled=false;
   ctx.drawImage(img,0,0,80,54,p.x-w/2,p.y-h-7,w,h);
-  const sheet=files['light_'+lightMode];
-  if(sheet?.complete&&sheet.naturalWidth){
-    ctx.save();
-    ctx.beginPath();ctx.moveTo(1007,282);
-    ctx.quadraticCurveTo(1105,275,1203,282);
-    ctx.lineTo(1203,300);ctx.lineTo(1007,300);ctx.closePath();ctx.clip();
-    ctx.drawImage(sheet,1007,340,196,26,1007,277,196,24);
-    ctx.restore();
+  // Original blue diamond duvet, extended naturally up to the chin using
+  // this lighting mode's *same* painted bed texture (not a second plain sheet).
+  ctx.filter='none';ctx.imageSmoothingEnabled=true;
+  const prior=files['bedcover_'+lastLight],current=files['bedcover_'+lightMode];
+  if(lastLight!==lightMode&&lightAmount<1&&prior?.complete&&prior.naturalWidth){
+    ctx.globalAlpha=1-ease(lightAmount);
+    ctx.drawImage(prior,994,276,226,108);
   }
+  if(current?.complete&&current.naturalWidth){
+    ctx.globalAlpha=(lastLight!==lightMode&&lightAmount<1)?ease(lightAmount):1;
+    ctx.drawImage(current,994,276,226,108);
+  }
+  ctx.globalAlpha=1;
   ctx.restore();ctx.imageSmoothingEnabled=true;
  }
 }

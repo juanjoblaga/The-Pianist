@@ -35,7 +35,7 @@ test('furniture poses have valid safe exits',()=>{
   }
  }
  assert(config.furniture.sofa.lie,'Sofa should offer a lying pose');
- assert.equal(physics.passable(1062,718),true,'Shower needs a genuinely walkable exit');
+ assert.equal(physics.passable(1250,751),true,'Shower needs a genuinely walkable exit');
 });
 test('all 13 objects are reachable on 8-way movement grid',()=>{
  const delta=[[8,0],[-8,0],[0,8],[0,-8],[8,8],[-8,8],[8,-8],[-8,-8]];
@@ -74,7 +74,7 @@ test('poses and release rendering avoid old unnatural assets',()=>{
  assert(visuals.balchair.sit.scale>=.85&&visuals.beanbag.sit.scale>=.85);
  assert(game.includes('const exit=id===\'shower\'?safeExit({x:1062,y:718})'),'shower must exit clear of walls');
  assert(!game.includes("const img=files[spriteFile.piano]"),'Do not restore distorted piano arm atlas');
- assert(!game.includes("ctx.drawImage(img,994,338,222,130)"),'No duplicate duvet over torso');
+ assert(game.includes("files['bedcover_'+lightMode]"),'Use identical patterned duvet texture');
 });
 
 test('head proportions, sofa lying pose and piano bench alignment',()=>{
@@ -87,9 +87,9 @@ test('head proportions, sofa lying pose and piano bench alignment',()=>{
  assert(!game.includes("ctx.drawImage(img,80,0,80,112,-38,-79"),
   'Do not rotate an entire upright character sideways for sofa lying');
  const p=config.furniture.piano.sit;
- assert(p.x>=728&&p.x<=750&&p.y>=375&&p.y<=400,
+ assert(p.x>=745&&p.x<=760&&p.y>=375&&p.y<=400,
   'Piano pose should sit on the bench, not in front of it');
- assert(p.x+40>=776&&p.x+40<=800,
+ assert(p.x+40>=782&&p.x+40<=810,
   'Finger tips should reach the existing keybed x=782..795');
  assert(visuals.piano.sit.handTravel<=4,'Hand articulation should be small and natural');
  assert(game.includes('spriteFile.pianoMotion')&&game.includes('Math.floor(time*spec.beatsPerSecond*6)%6'),
@@ -104,9 +104,19 @@ test('v0.5.4 help, bed sheet and approved piano regressions',()=>{
  assert(css.includes('.helpScroll{min-height:0;flex:1 1 auto;overflow-y:auto'));
  assert(game.includes("$('#closeHelpTop').onclick=closeHelpModal"));
  assert(!game.includes('ctx.drawImage(duvet,993,333,225,123)'));
- assert(game.includes("const sheet=files['light_'+lightMode]"));
+ assert(game.includes("const prior=files['bedcover_'+lastLight],current=files['bedcover_'+lightMode]"));
  assert.equal(art.atlas.pianoMotion.columns,6);
  assert.equal(art.sprites.pianoMotion,'piano_motion_v054');
  assert(config.objects.find(o=>o.id==='sofa').reach>=70);
- assert(config.furniture.shower.shower.exit.x>1050);
+ assert.equal(config.furniture.shower.shower.exit.x,1250);
+ assert.equal(config.furniture.shower.shower.exit.y,751);
+});
+
+test('v0.5.5 cover matches lighting and shower exit remains reachable',()=>{
+ const art=require(path.join(assets,'game-assets.js'));
+ assert(art.modeLayers.includes('bedcover'));
+ const {x,y}=config.furniture.shower.shower.exit;
+ assert(physics.passable(x,y));
+ assert(Math.hypot(x-1277,y-711)<56);
+ for(let X=x;X>=1042;X-=2)assert(physics.passable(X,y),'Bathroom return blocked: '+X);
 });

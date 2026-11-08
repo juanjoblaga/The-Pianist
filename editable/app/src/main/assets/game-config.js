@@ -74,8 +74,8 @@ const furniture={
  bed:{sit:{x:1103,y:502,face:'down',exit:{x:1103,y:526}},lie:{x:1104,y:289,face:'up',exit:{x:1103,y:526}}},
  balchair:{sit:{x:470,y:149,face:'left',exit:{x:527,y:144}}},
  beanbag:{sit:{x:759,y:149,face:'down',exit:{x:681,y:144}}},
- piano:{sit:{x:740,y:382,face:'right',exit:{x:699,y:420}}},
- shower:{shower:{x:1315,y:671,face:'up',exit:{x:1062,y:718}}}
+ piano:{sit:{x:751,y:382,face:'right',exit:{x:699,y:420}}},
+ shower:{shower:{x:1315,y:671,face:'up',exit:{x:1250,y:751}}}
 };
 
 const config={dialogueScript,rooms,solids,objects,furniture};
