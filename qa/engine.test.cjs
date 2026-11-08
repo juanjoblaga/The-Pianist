@@ -141,7 +141,7 @@ test('translucent day/night balcony and natural piano foreground depth',()=>{
  assert(fence.includes("files['light_'+lightMode]"),'Furniture must follow lighting mode');
  assert(fence.includes('ctx.createRadialGradient'),'Fairy-light glow must survive');
  assert(fence.includes('ctx.lineTo(825,113)'),'Railing geometry missing');
- assert(game.includes('drawBase();drawBalconyFence();drawFourthFloorFacade();'));
+ assert(game.includes('drawBase();drawSofaWithoutCushion();drawBalconyFence();drawFourthFloorFacade();'));
  assert(game.includes('drawPlayer();drawPianoFrontOcclusion();'),
    'Foreground piano must hide shins while leaving hands over the keys');
  assert.equal(config.furniture.piano.sit.x,777);

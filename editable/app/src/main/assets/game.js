@@ -36,6 +36,13 @@ function discardMode(mode){if(!mode||mode===lightMode)return;
 let modeToken=0,ready=false,failedStartup=false;
 Promise.all([...persistentAssets.map(ensureAsset),ensureMode('afternoon')]).then(()=>{
  ready=true;document.querySelector('#loadStatus')?.remove();
+ try{if(localStorage.getItem('thepianist.travel.spawnFromStop.v1')==='1'){
+  localStorage.removeItem('thepianist.travel.spawnFromStop.v1');
+  const m=localStorage.getItem('thepianist.travel.light.v1');
+  const w=localStorage.getItem('thepianist.travel.weather.v1');
+  if(m&&m!==lightMode)setLighting(m);if(w&&w!==weather)setWeather(w);
+  player.x=755;player.y=828;player.dir='up';
+ }}catch(e){console.warn('Travel restoration:',e)}
 }).catch(e=>{failedStartup=true;console.error('Game startup:',e)});
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const player={x:730,y:570,dir:'down',moving:false,phase:0,pose:null,transition:null};
@@ -151,7 +158,7 @@ function interact(){
  const obj=nearest();if(!obj){notice('Move closer and face an object');return}
  const id=obj.id==='balchair'?'balcony':obj.id==='kitchen2'?'kitchen':obj.id;
  if(id==='frontdoor'){
-  showDialogue('frontdoor',[{label:'Leave (coming later)',disabled:true},{label:'Stay',action:()=>{}}]);return;
+  showDialogue('frontdoor',[{label:'Go to New Islington',action:()=>{try{localStorage.setItem('thepianist.travel.light.v1',lightMode);localStorage.setItem('thepianist.travel.weather.v1',weather)}catch(_){}location.assign('travel.html')}},{label:'Stay',action:()=>{}}]);return;
  }
  if(id==='piano'){
   showDialogue('piano',[{label:'Play',action:()=>changePose('piano','sit')},{label:'Leave',action:()=>{}}]);return;
@@ -560,6 +567,35 @@ function drawPianoFrontOcclusion(){
  else drawWorldImage(b);
  ctx.restore();
 }
+// When lying on the sofa, move the exact dark cushion from the original sofa
+// into the reclining sprite. We only patch the sofa during that pose.
+let darkSofaSprite=null;
+function recolorRestPillow(img){
+ if(darkSofaSprite||!img?.naturalWidth)return darkSofaSprite;
+ const cv=document.createElement('canvas');cv.width=img.naturalWidth;cv.height=img.naturalHeight;
+ const cx=cv.getContext('2d');cx.drawImage(img,0,0);
+ const data=cx.getImageData(0,0,cv.width,cv.height);const d=data.data;
+ for(let f=0;f<3;f++)for(let y=58;y<95;y++)for(let x=164;x<238;x++){
+  const i=(y*cv.width+f*240+x)*4;if(d[i+3]<7)continue;
+  const r=d[i],g=d[i+1],b=d[i+2];
+  // Only low-saturation pale fabric; hair/skin remain completely unchanged.
+  if(r>89&&g>85&&b>81&&Math.abs(r-g)<31&&Math.abs(g-b)<33){
+    const lum=(r+g+b)/3,t=Math.max(-15,Math.min(22,(lum-164)*.24));
+    d[i]=Math.round(42+t);d[i+1]=Math.round(45+t);d[i+2]=Math.round(67+t);
+  }
+ }
+ cx.putImageData(data,0,0);darkSofaSprite=cv;return cv;
+}
+function drawSofaWithoutCushion(){
+ if(player.pose?.id!=='sofa'||player.pose.type!=='lie')return;
+ // Sofa upholstery sampled from the very same painted plate, with its
+ // own light-mode palette, covering the formerly visible loose cushion.
+ ctx.save();ctx.beginPath();ctx.roundRect(496,226,70,51,6);ctx.clip();
+ const drawPatch=(img,opacity)=>{if(!img?.naturalWidth)return;ctx.globalAlpha=opacity;ctx.drawImage(img,440,255,70,60,496,226,70,51)};
+ const prev=files['light_'+lastLight],cur=files['light_'+lightMode];
+ if(lastLight!==lightMode&&lightAmount<1){drawPatch(prev,1);drawPatch(cur,ease(lightAmount))}else drawPatch(cur,1);
+ ctx.restore();
+}
 function drawReclining(p){
  if(p.id==='sofa'){
   // Approved ceiling-facing three-frame resting pose from v0.4.6, now scaled
@@ -570,7 +606,7 @@ function drawReclining(p){
   const frame=[0,1,2,1][Math.floor(time*1.35)%4];
   const spec=poseStyles.sofa.lie;
   ctx.save();ctx.filter=actorFilter(p.x,p.y);ctx.imageSmoothingEnabled=false;
-  ctx.drawImage(img,frame*240,0,240,96,p.x-spec.width/2,p.y-spec.height+6,spec.width,spec.height);
+  ctx.drawImage(recolorRestPillow(img)||img,frame*240,0,240,96,p.x-spec.width/2,p.y-spec.height+6,spec.width,spec.height);
   ctx.restore();ctx.imageSmoothingEnabled=true;
   return;
  }
@@ -706,7 +742,7 @@ function draw(){if(!ready){ctx.fillStyle='#111720';ctx.fillRect(0,0,W,H);return;
  // One world plane extends behind the entire apartment, including the bedroom window.
  drawCourtyard();drawFallingLeaves();outdoorTint();
  // Opaque apartment sections cover the courtyard; true glazing reveals the same world.
- drawBase();drawBalconyFence();drawFourthFloorFacade();drawBathroomMirror();drawBedroomWindow();drawBalconyDoor();drawPhysicalDoors();
+ drawBase();drawSofaWithoutCushion();drawBalconyFence();drawFourthFloorFacade();drawBathroomMirror();drawBedroomWindow();drawBalconyDoor();drawPhysicalDoors();
  // Balcony reveal comes from gentle camera look-up; never paste a band over the flat.
  ambientDust();drawWeather();updateAmbient();
  timeLight();

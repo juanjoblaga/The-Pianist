@@ -41,7 +41,7 @@ const solids=[
  [993,202,1215,488],[1285,290,1357,536],[1219,203,1321,289], // bed and wardrobe
  [1096,586,1175,682],[1188,626,1268,739],[1278,570,1355,765], // sink, toilet, shower
  [357,54,430,135],[445,52,492,135],[722,50,805,145], // balcony furniture
- [230,13,838,52],                   // rear railing base
+ [230,13,838,86],                   // rear railing base
  [235,160,579,177],[655,160,832,177],// balcony glass base (only doorway open)
  [864,121,920,441],                 // bedroom dividing wall
  [944,548,960,621],                 // bathroom outside corner, narrow wall
