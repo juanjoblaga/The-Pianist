@@ -575,7 +575,8 @@ function drawPianoFrontOcclusion(){
 }
 // When lying on the sofa, move the exact dark cushion from the original sofa
 // into the reclining sprite. We only patch the sofa during that pose.
-// Resting pillow colour is precalculated from the original sprite (WebView-safe).\nfunction drawSofaWithoutCushion(){
+// Resting pillow colour is precalculated from the original sprite (WebView-safe).
+function drawSofaWithoutCushion(){
  if(!((player.pose?.id==='sofa'&&player.pose.type==='lie')||(player.transition?.id==='sofa'&&player.transition.type==='lie')))return;
  // Sofa upholstery sampled from the very same painted plate, with its
  // own light-mode palette, covering the formerly visible loose cushion.
