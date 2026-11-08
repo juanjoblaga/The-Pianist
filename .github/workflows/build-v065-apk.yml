@@ -5,7 +5,7 @@ on:
     branches:
       - delivery/v0-6-5-apk
     paths:
-      - incoming/ThePianist_v0.6.5_Editable_Source_Preview.zip
+      - incoming/ThePianist_v0.6.5_Clean_Editable_Source.zip
   workflow_dispatch:
 
 permissions:
@@ -37,9 +37,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ARCHIVE="incoming/ThePianist_v0.6.5_Editable_Source_Preview.zip"
+          ARCHIVE="incoming/ThePianist_v0.6.5_Clean_Editable_Source.zip"
           test -s "$ARCHIVE"
-          printf '%s  %s\n' "61d04ec2a56945ca425dcef10d50d00f36dd39297fa08f3e5096074fc645e794" "$ARCHIVE" | sha256sum --check
+          printf '%s  %s\n' "4e5e8f0044ad5d77850a2c7ae11aaa99775088ba116b9771ee18366a6a90726b" "$ARCHIVE" | sha256sum --check
           unzip -tq "$ARCHIVE"
           mkdir -p source
           unzip -q "$ARCHIVE" -d source
@@ -49,6 +49,18 @@ jobs:
           test -f source/app/src/main/assets/VERSION.json
           python -m pip install --quiet pillow
           python source/qa/verify_integrity.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('source/app/src/main/assets')
+          record=json.loads(Path('source/qa/asset_prune_manifest.json').read_text())
+          assert len(record['unreferenced_removed'])==30, 'Unexpected asset-prune inventory'
+          assert all(not (root/x['name']).exists() for x in record['unreferenced_removed']), 'Obsolete assets still packaged'
+          active=['station_world.png','station_obj_tram.png','station_clouds_storm.png','piano_motion_v054.png','sofa_rest_dark_v059.png',
+                  'walk_cycle_v045.png','portrait_thoughtful.png','portrait_gentle.png','duvet_foreground.png']
+          assert all((root/x).is_file() for x in active), 'Current approved asset missing'
+          print('Release asset-prune gate: 30 historical images removed; active images retained')
+          PY
           find source/app/src/main/assets -name '*.js' -print0 | xargs -0 -n1 node --check
           test "$(find source -type f \( -name '*.jks' -o -name '*.keystore' -o -name '*.p12' \) | wc -l)" -eq 0
 
