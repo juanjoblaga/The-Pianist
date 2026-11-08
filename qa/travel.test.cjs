@@ -16,9 +16,12 @@ test('travel hub asset and return-home routes are present',()=>{
 test('sofa cushion changes only during lying, balcony cannot approach rear rail',()=>{
  const game=read('game.js'),config=require(path.join(src,'game-config.js'));
  const physics=require(path.join(src,'game-physics.js')).create(config,9);
- assert(game.includes('function recolorRestPillow(img)'));
+ assert(!game.includes('function recolorRestPillow(img)'));
+ assert(game.includes('ctx.drawImage(img,frame*240'));
+ assert(require(path.join(src,'game-assets.js')).sprites.sofaRest==='sofa_rest_dark_v059');
  assert(game.includes('function drawSofaWithoutCushion()'));
- assert(game.includes("player.pose?.id!=='sofa'"));
+ assert(game.includes("player.pose?.id==='sofa'"));
  assert(!physics.passable(590,90),'Rear railing must block feet near the fence');
- assert(physics.passable(590,108),'Balcony must still have usable walking space');
+ assert(!physics.passable(590,108),'Rear fence must block walking through rails');
+ assert(physics.passable(590,132),'Balcony still needs an accessible floor');
 });

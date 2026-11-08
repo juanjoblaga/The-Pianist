@@ -11,9 +11,8 @@ const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
   await page.goto('http://127.0.0.1:8033/index.html?qa=1');
   await page.waitForFunction(()=>window.__pianistTest?.isReady(),{timeout:30000});
   await page.evaluate(()=>window.__pianistTest.setPlayer(760,794,'down'));
-  await page.evaluate(()=>window.__pianistTest.interact());
-  const btn=page.getByRole('button',{name:'Go to New Islington'});
-  await btn.waitFor();await btn.dispatchEvent('pointerdown',{bubbles:true,cancelable:true});
+  // Real Android-style one-tap action, not test-helper navigation.
+  await page.locator('#action').click();
   await page.waitForURL('**/travel.html',{timeout:10000});
   await pause(700);
   assert(await page.locator('#travelButton').isVisible());

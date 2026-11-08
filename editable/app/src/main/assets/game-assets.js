@@ -6,7 +6,7 @@
 'use strict';
 const catalog={
  modes:['sunrise','morning','afternoon','sunset','night'],
- modeLayers:['world','light','bedcover'],
+ modeLayers:['world','light','bedcover','balconyprops'],
  weather:['sunny','cloudy','foggy','rainy','snowy','storm','windy'],
  sprites:{
   walk:'walk_cycle_v045',
@@ -16,7 +16,7 @@ const catalog={
   beanbagSit:'beanbag_clean_v042',
   piano:'piano_play_v045',
   pianoMotion:'piano_motion_v054',
-  sofaRest:'sofa_lie_v053',
+  sofaRest:'sofa_rest_dark_v059',
   duvet:'duvet_foreground'
  },
  atlas:{

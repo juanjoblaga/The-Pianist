@@ -129,3 +129,25 @@ Browser test extended for mobile help menu and multiple sofa approach points. Dr
   shower, weather, mirror/door geometry and the existing mirrored exterior.
 - New browser screenshots compare daylight and night through the fence.
 - No version bump or APK requested — keep as draft pending visual approval.
+
+## v0.5.6 — phone regression repairs
+
+- Android-safe sofa lying: precompute the original cushion's dark colour
+  offline, rather than calling canvas.getImageData in Android WebView.
+  The transition preserves its real exit point and does not fade the game.
+- Correct silhouettes for the balcony table, chair, plant and beanbag.
+  Maintain the see-through wrought-iron railing and fairy lights at all times.
+- Collision starts farther from the rear railing, so the player cannot walk
+  through the fence while preserving useful balcony walking space.
+- Remove the entire ghost door and shadow (including its missed right tip)
+  from all five lighting plates. Preserve the actual sill and entrance mat.
+- Make departure to New Islington a single tap on TRAVEL at the main door.
+  Retain the approved 'Let's go.' text and existing weather/time persistence.
+- Reset the canvas alpha/filter/transformation each frame to guard against
+  translucent-player and bedroom-window states.
+- All approved piano, sofa, bed, shower, weather, authored dialogue,
+  joystick, Travel Hub and map functionality are retained.
+- Android versionName 0.5.6 / versionCode 25. Draft pending phone acceptance.
+
+### Balcony object foreground
+Generated alpha cutouts isolate the approved balcony plant, chair, table and beanbag from the old dark night background. This removes black oval silhouettes while keeping the translucent railing and dynamic light.

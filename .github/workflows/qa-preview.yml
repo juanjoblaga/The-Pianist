@@ -27,6 +27,8 @@ jobs:
         run: |
           set -euo pipefail
           python3 qa/generate-piano-frames.py
+          python3 qa/generate-sofa-pillow.py editable/app/src/main/assets
+          python3 qa/generate-balcony-props.py editable/app/src/main/assets
           python3 qa/generate-bedcover.py editable/app/src/main/assets
           node --check editable/app/src/main/assets/game-assets.js
           node --check editable/app/src/main/assets/game-poses.js
@@ -47,6 +49,8 @@ jobs:
           rsync -a editable/app/src/main/ build-project/app/src/main/
           python3 qa/generate-daylight.py
           python3 qa/restore-doors.py
+          python3 qa/generate-sofa-pillow.py
+          python3 qa/generate-balcony-props.py
           python3 qa/generate-bedcover.py
           # A single manifest sets versionCode/versionName and matching HUD text.
           python3 qa/set-version.py
