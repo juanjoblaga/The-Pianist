@@ -6,17 +6,17 @@ This is an isolated candidate branch. It does not change `main`, the original AP
 
 Upload the **complete** binary source archive to this folder with this exact name:
 
-`ThePianist_v0.6.5_Editable_Source_Preview.zip`
+`ThePianist_v0.6.5_Clean_Editable_Source.zip`
 
-Expected SHA-256 (verified against the original archive):
+Expected SHA-256 (verified against the cleaned v0.6.5 archive):
 
-`61d04ec2a56945ca425dcef10d50d00f36dd39297fa08f3e5096074fc645e794`
+`4e5e8f0044ad5d77850a2c7ae11aaa99775088ba116b9771ee18366a6a90726b`
 
-The corresponding source comes from the completed ChatGPT v0.6.5 review, NOT the old baseline. It includes five station sky layers, seven cloud/weather layers, player assets, all apartment art, scripts, and QA.
+The corresponding source comes from the completed ChatGPT v0.6.5 review, NOT the old baseline. It includes five station sky layers, seven cloud/weather layers, current player assets, all approved apartment artwork, eight approved character portraits, scripts, and QA. Thirty unused historical images (older sprite variants, baked door overlays and obsolete snow) have been removed. The build verifies the clean-asset manifest and will reject an archive that still includes them.
 
 ## Automatic APK build
 
-A push to `incoming/ThePianist_v0.6.5_Editable_Source_Preview.zip` on this branch triggers [build-v065-apk.yml](../.github/workflows/build-v065-apk.yml).
+A push to `incoming/ThePianist_v0.6.5_Clean_Editable_Source.zip` on this branch triggers [build-v065-apk.yml](../.github/workflows/build-v065-apk.yml).
 
 The build checks the source ZIP integrity and its exact hash, validates the v0.6.5/code34 asset contract, unpacks the **original v0.4.5 Android signing baseline** from the repository, overlays the entire current game, builds the APK, checks package `com.thepianist.game` / versionCode 34 and compares its signer with the existing v0.6.4 certificate.
 
