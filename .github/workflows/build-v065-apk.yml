@@ -28,7 +28,13 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - uses: android-actions/setup-android@v3
+      # GitHub's Ubuntu image already contains Android SDK; the legacy
+      # setup-android@v3 action fails trying to install removed 'tools'.
+      - name: Verify preinstalled Android SDK
+        run: |
+          test -n "${ANDROID_HOME:-}"
+          test -d "$ANDROID_HOME/build-tools"
+          ls "$ANDROID_HOME/build-tools"
 
       - uses: gradle/actions/setup-gradle@v4
         with:
